@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baby Monitor</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>👶 Baby Monitor</h1>
+            <div class="status-indicator" id="connectionStatus">
+                <span class="dot"></span> Connected
+            </div>
+        </header>
+
+        <main>
+            <section class="video-section">
+                <div class="video-wrapper">
+                    <img id="videoFeed" src="/video_feed" alt="Baby Camera Feed">
+                    <div class="video-overlay" id="videoOverlay">
+                        <span>Loading camera...</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="controls-section">
+                <div class="control-group">
+                    <label for="cameraSelect">Camera</label>
+                    <select id="cameraSelect">
+                        {% for cam in cameras %}
+                        <option value="{{ cam.id }}">{{ cam.name }} ({{ cam.resolution }})</option>
+                        {% endfor %}
+                        {% if not cameras %}
+                        <option value="0">No cameras found</option>
+                        {% endif %}
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="micSelect">Microphone</label>
+                    <select id="micSelect">
+                        {% for mic in microphones %}
+                        <option value="{{ mic.id }}">{{ mic.name }}</option>
+                        {% endfor %}
+                        {% if not microphones %}
+                        <option value="0">No microphones found</option>
+                        {% endif %}
+                    </select>
+                </div>
+
+                <div class="button-group">
+                    <button id="testAlertBtn" class="btn btn-warning">Test Discord Alert</button>
+                    <button id="forceReportBtn" class="btn btn-info">Send Status Report</button>
+                </div>
+            </section>
+
+            <section class="status-section">
+                <h2>Current Status</h2>
+                <div class="status-grid">
+                    <div class="status-card" id="babyCard">
+                        <h3>Baby</h3>
+                        <div class="risk-badge" id="riskBadge">SAFE</div>
+                        <p id="babyPosition">Position: --</p>
+                        <p id="babyInCrib">In crib: --</p>
+                        <p id="babyFace">Face covered: --</p>
+                        <p id="babyDesc" class="desc">--</p>
+                    </div>
+
+                    <div class="status-card" id="motionCard">
+                        <h3>Motion</h3>
+                        <p id="motionStatus">Motion: --</p>
+                        <p id="motionMagnitude">Magnitude: --</p>
+                        <p id="motionDesc" class="desc">--</p>
+                    </div>
+
+                    <div class="status-card" id="audioCard">
+                        <h3>Audio</h3>
+                        <p id="audioCrying">Crying: --</p>
+                        <p id="audioBreathing">Breathing: --</p>
+                        <p id="audioDesc" class="desc">--</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

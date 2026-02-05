@@ -1,0 +1,242 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0f1117;
+    color: #e4e4e7;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #27272a;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: #a1a1aa;
+}
+
+.status-indicator .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+}
+
+.status-indicator.disconnected .dot {
+    background: #ef4444;
+}
+
+/* Video */
+.video-section {
+    margin-bottom: 20px;
+}
+
+.video-wrapper {
+    position: relative;
+    background: #18181b;
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 4/3;
+}
+
+.video-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.video-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    font-size: 0.9rem;
+    color: #a1a1aa;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.video-overlay.visible {
+    opacity: 1;
+}
+
+/* Controls */
+.controls-section {
+    display: flex;
+    gap: 12px;
+    align-items: end;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.control-group {
+    flex: 1;
+    min-width: 150px;
+}
+
+.control-group label {
+    display: block;
+    font-size: 0.75rem;
+    color: #a1a1aa;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+select {
+    width: 100%;
+    padding: 8px 12px;
+    background: #27272a;
+    border: 1px solid #3f3f46;
+    border-radius: 8px;
+    color: #e4e4e7;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+select:focus {
+    outline: none;
+    border-color: #6366f1;
+}
+
+.button-group {
+    display: flex;
+    gap: 8px;
+}
+
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+}
+
+.btn:hover {
+    opacity: 0.85;
+}
+
+.btn:active {
+    opacity: 0.7;
+}
+
+.btn-warning {
+    background: #f59e0b;
+    color: #000;
+}
+
+.btn-info {
+    background: #3b82f6;
+    color: #fff;
+}
+
+/* Status */
+.status-section h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.status-card {
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.status-card h3 {
+    font-size: 0.8rem;
+    color: #a1a1aa;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+}
+
+.status-card p {
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+}
+
+.status-card .desc {
+    color: #71717a;
+    font-size: 0.8rem;
+    margin-top: 8px;
+}
+
+.risk-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+}
+
+.risk-badge.safe {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+}
+
+.risk-badge.warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+}
+
+.risk-badge.danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .container { padding: 10px; }
+    header h1 { font-size: 1.1rem; }
+    .controls-section { flex-direction: column; }
+    .control-group { min-width: 100%; }
+    .button-group { width: 100%; }
+    .btn { flex: 1; }
+}
