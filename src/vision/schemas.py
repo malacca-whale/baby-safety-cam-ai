@@ -21,7 +21,11 @@ class MotionStatus(BaseModel):
 class AudioStatus(BaseModel):
     is_crying: bool = False
     cry_type: str = ""
+    cry_confidence: float = 0.0
     breathing_detected: bool = False
+    breathing_rate: float = 0.0
+    rms_level: float = 0.0
+    spectral_centroid: float = 0.0
     description: str = ""
 
 

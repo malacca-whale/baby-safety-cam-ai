@@ -9,7 +9,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>👶 Baby Monitor</h1>
+            <h1>Baby Monitor</h1>
             <div class="status-indicator" id="connectionStatus">
                 <span class="dot"></span> Connected
             </div>
@@ -21,6 +21,13 @@
                     <img id="videoFeed" src="/video_feed" alt="Baby Camera Feed">
                     <div class="video-overlay" id="videoOverlay">
                         <span>Loading camera...</span>
+                    </div>
+                    <!-- Audio listen button overlay -->
+                    <button id="audioToggleBtn" class="audio-toggle" title="Listen to audio">
+                        <span id="audioIcon">&#128266;</span>
+                    </button>
+                    <div class="audio-level-bar">
+                        <div class="audio-level-fill" id="audioLevelFill"></div>
                     </div>
                 </div>
             </section>
@@ -51,13 +58,13 @@
                 </div>
 
                 <div class="button-group">
-                    <button id="testAlertBtn" class="btn btn-warning">Test Discord Alert</button>
-                    <button id="forceReportBtn" class="btn btn-info">Send Status Report</button>
+                    <button id="testAlertBtn" class="btn btn-warning">Test Alert</button>
+                    <button id="forceReportBtn" class="btn btn-info">Status Report</button>
                 </div>
             </section>
 
             <section class="status-section">
-                <h2>Current Status</h2>
+                <h2>Live Status</h2>
                 <div class="status-grid">
                     <div class="status-card" id="babyCard">
                         <h3>Baby</h3>
@@ -79,13 +86,49 @@
                         <h3>Audio</h3>
                         <p id="audioCrying">Crying: --</p>
                         <p id="audioBreathing">Breathing: --</p>
+                        <p id="audioRms">Level: --</p>
                         <p id="audioDesc" class="desc">--</p>
                     </div>
+                </div>
+            </section>
+
+            <!-- Stats -->
+            <section class="stats-section">
+                <h2>Statistics</h2>
+                <div class="stats-bar" id="statsBar">
+                    <span>Vision: <b id="statVision">0</b></span>
+                    <span>Motion: <b id="statMotion">0</b></span>
+                    <span>Audio: <b id="statAudio">0</b></span>
+                    <span>Discord: <b id="statDiscord">0</b></span>
+                    <span>Alerts: <b id="statAlerts">0</b></span>
+                    <span>Cries: <b id="statCries">0</b></span>
+                </div>
+            </section>
+
+            <!-- Tabs for History -->
+            <section class="history-section">
+                <div class="tab-bar">
+                    <button class="tab active" data-tab="discord">Discord Log</button>
+                    <button class="tab" data-tab="vision">Vision</button>
+                    <button class="tab" data-tab="events">Events</button>
+                </div>
+
+                <div class="tab-content active" id="tab-discord">
+                    <div class="log-list" id="discordLog"></div>
+                </div>
+
+                <div class="tab-content" id="tab-vision">
+                    <div class="log-list" id="visionLog"></div>
+                </div>
+
+                <div class="tab-content" id="tab-events">
+                    <div class="log-list" id="eventsLog"></div>
                 </div>
             </section>
         </main>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
     <script src="/static/js/app.js"></script>
 </body>
 </html>

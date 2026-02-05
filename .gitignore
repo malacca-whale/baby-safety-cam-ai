@@ -72,4 +72,34 @@ dmypy.json
 .ruff_cache/
 
 # Project Specific
+# Project Specific
 output/
+*.db
+*.sqlite
+*.sqlite3
+*.csv
+
+# Frontend
+node_modules/
+package-lock.json
+yarn.lock
+
+# Media (Images, Video, Audio)
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
+*.wav
+*.mp3
+
+# AI Models (if stored locally)
+*.pt
+*.pth
+*.bin
+*.onnx
+*.safetensors

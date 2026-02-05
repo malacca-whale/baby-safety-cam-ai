@@ -10,6 +10,7 @@ from src.pipeline.processor import Pipeline
 from src.streaming.camera import CameraManager
 from src.audio.analyzer import AudioAnalyzer
 from src.utils.config import Config
+from src.db.database import Database
 
 logging.basicConfig(
     level=logging.INFO,
@@ -25,7 +26,9 @@ app = Flask(
 app.config["SECRET_KEY"] = "baby-monitor-secret"
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-pipeline = Pipeline()
+ENABLE_VISION = True
+pipeline = Pipeline(enable_vision=ENABLE_VISION, socketio=socketio)
+db = Database()
 
 
 @app.route("/")
@@ -81,7 +84,7 @@ def switch_microphone():
     data = request.json
     mic_id = data.get("microphone_id", 0)
     pipeline.audio.stop()
-    pipeline.audio.start(mic_id)
+    pipeline.audio.start(mic_id, socketio=socketio)
     return jsonify({"success": True})
 
 
@@ -102,6 +105,52 @@ def force_report():
     frame = pipeline.camera.get_frame()
     pipeline.alert_manager.force_status_report(frame)
     return jsonify({"success": True})
+
+
+# --- History / Logs API ---
+
+@app.route("/api/history/events")
+def get_events():
+    limit = request.args.get("limit", 50, type=int)
+    event_type = request.args.get("type")
+    return jsonify(db.get_recent_events(limit, event_type))
+
+
+@app.route("/api/history/discord")
+def get_discord_history():
+    limit = request.args.get("limit", 50, type=int)
+    channel = request.args.get("channel")
+    return jsonify(db.get_recent_discord_messages(limit, channel))
+
+
+@app.route("/api/history/vision")
+def get_vision_history():
+    limit = request.args.get("limit", 50, type=int)
+    return jsonify(db.get_recent_vision(limit))
+
+
+@app.route("/api/history/motion")
+def get_motion_history():
+    limit = request.args.get("limit", 50, type=int)
+    return jsonify(db.get_recent_motion(limit))
+
+
+@app.route("/api/history/audio")
+def get_audio_history():
+    limit = request.args.get("limit", 50, type=int)
+    return jsonify(db.get_recent_audio(limit))
+
+
+@app.route("/api/stats")
+def get_stats():
+    return jsonify(db.get_stats())
+
+
+# --- SocketIO events ---
+
+@socketio.on("connect")
+def handle_connect():
+    logger.info("Browser connected via SocketIO")
 
 
 def main():
