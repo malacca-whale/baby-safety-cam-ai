@@ -129,7 +129,13 @@ async function updateStatus() {
         babyPosition.textContent = `Position: ${baby.position || '--'}`;
         babyInCrib.textContent = `In crib: ${baby.in_crib !== undefined ? (baby.in_crib ? 'Yes' : 'No') : '--'}`;
         babyFace.textContent = `Face covered: ${baby.face_covered !== undefined ? (baby.face_covered ? 'YES' : 'No') : '--'}`;
-        babyDesc.textContent = baby.description || '--';
+        const extras = [];
+        if (baby.blanket_near_face) extras.push('Blanket near face');
+        if (baby.loose_objects) extras.push('Loose objects');
+        if (baby.eyes_open) extras.push('Eyes open');
+        if (!baby.baby_visible) extras.push('Baby NOT visible');
+        const extrasText = extras.length ? ` | ${extras.join(', ')}` : '';
+        babyDesc.textContent = (baby.description || '--') + extrasText;
 
         const babyCard = document.getElementById('babyCard');
         babyCard.className = 'status-card' + (risk === 'danger' ? ' card-danger' : risk === 'warning' ? ' card-warning' : '');

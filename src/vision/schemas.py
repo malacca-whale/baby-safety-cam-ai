@@ -5,9 +5,13 @@ from datetime import datetime
 
 class BabyStatus(BaseModel):
     face_covered: bool = False
-    position: Literal["supine", "prone", "side", "unknown"] = "unknown"
+    position: Literal["supine", "prone", "side", "sitting", "unknown"] = "unknown"
     in_crib: bool = True
     risk_level: Literal["safe", "warning", "danger"] = "safe"
+    eyes_open: bool = False
+    loose_objects: bool = False
+    blanket_near_face: bool = False
+    baby_visible: bool = True
     description: str = ""
     timestamp: datetime | None = None
 

@@ -72,7 +72,6 @@ dmypy.json
 .ruff_cache/
 
 # Project Specific
-# Project Specific
 output/
 *.db
 *.sqlite
@@ -97,9 +96,13 @@ yarn.lock
 *.wav
 *.mp3
 
-# AI Models (if stored locally)
+# AI Models & Data
 *.pt
 *.pth
 *.bin
 *.onnx
 *.safetensors
+*.gguf
+*.dat
+*.pkl
+*.pickle

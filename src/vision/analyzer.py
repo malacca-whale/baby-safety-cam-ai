@@ -12,18 +12,24 @@ from src.db.database import Database
 
 logger = logging.getLogger(__name__)
 
-ANALYSIS_PROMPT = """You are a baby safety monitor AI. Analyze this baby camera image and respond ONLY with a JSON object (no markdown, no explanation, no extra text).
+ANALYSIS_PROMPT = """You are a baby sleep safety monitor AI trained on SIDS prevention guidelines (AAP Safe Sleep recommendations).
 
-Check for:
-1. Is the baby's face covered by cloth/blanket? (suffocation risk)
-2. What position is the baby in? (supine=on back, prone=on stomach, side=on side)
-3. Is the baby inside the crib/bed?
-4. Overall risk level: "safe", "warning", or "danger"
+Analyze this baby camera image carefully. Check ALL of the following safety conditions:
 
-Respond with EXACTLY this JSON format:
-{"face_covered": false, "position": "supine", "in_crib": true, "risk_level": "safe", "description": "Baby is sleeping safely on their back"}
+1. **Baby visible?** Is a baby/infant actually visible in this image?
+2. **Sleep position**: supine (on back, SAFE), prone (face-down/on stomach, DANGEROUS), side (on side, WARNING), sitting (upright, WARNING)
+3. **Face covered?** Is the baby's nose/mouth area covered by a blanket, cloth, pillow, or any object? (SUFFOCATION RISK - DANGER)
+4. **Blanket near face?** Is there a blanket or cloth within 5cm of the baby's face, even if not directly covering it? (WARNING)
+5. **In crib/bed?** Is the baby inside a crib, bassinet, or designated sleep area?
+6. **Loose objects?** Are there any loose objects in the sleep area (stuffed toys, pillows, bumper pads, loose blankets)?
+7. **Eyes open?** Are the baby's eyes open (awake) or closed (sleeping)?
 
-IMPORTANT: Output ONLY the JSON object. No other text."""
+RISK LEVEL RULES:
+- "danger": face_covered=true OR (position=prone AND baby appears to be sleeping)
+- "warning": position=side OR position=prone (awake/tummy time) OR blanket_near_face=true OR loose_objects=true OR in_crib=false
+- "safe": supine position, face clear, in crib, no loose objects
+
+Respond with ONLY a JSON object. No other text."""
 
 
 VQA_MAX_SIZE = 512  # max width for Ollama VQA requests
@@ -85,12 +91,16 @@ class VisionAnalyzer:
                     "format": {
                         "type": "object",
                         "properties": {
+                            "baby_visible": {"type": "boolean"},
                             "face_covered": {"type": "boolean"},
+                            "blanket_near_face": {"type": "boolean"},
                             "position": {
                                 "type": "string",
-                                "enum": ["supine", "prone", "side", "unknown"],
+                                "enum": ["supine", "prone", "side", "sitting", "unknown"],
                             },
                             "in_crib": {"type": "boolean"},
+                            "loose_objects": {"type": "boolean"},
+                            "eyes_open": {"type": "boolean"},
                             "risk_level": {
                                 "type": "string",
                                 "enum": ["safe", "warning", "danger"],
@@ -98,9 +108,13 @@ class VisionAnalyzer:
                             "description": {"type": "string"},
                         },
                         "required": [
+                            "baby_visible",
                             "face_covered",
+                            "blanket_near_face",
                             "position",
                             "in_crib",
+                            "loose_objects",
+                            "eyes_open",
                             "risk_level",
                             "description",
                         ],

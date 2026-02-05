@@ -35,10 +35,14 @@ class AlertManager:
             reasons = []
             if baby.face_covered:
                 reasons.append("Baby's face is covered - suffocation risk!")
+            if baby.blanket_near_face:
+                reasons.append("Blanket dangerously close to baby's face")
             if baby.position == "prone":
                 reasons.append("Baby is face-down (prone position)")
             if not baby.in_crib:
                 reasons.append("Baby may be outside the crib!")
+            if baby.loose_objects:
+                reasons.append("Loose objects detected in sleep area")
 
             title = "DANGER: Immediate Attention Required"
             desc = "\n".join(reasons) if reasons else baby.description
