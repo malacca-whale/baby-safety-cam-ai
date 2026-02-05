@@ -144,11 +144,11 @@ class AudioAnalyzer:
             if cry_confidence >= 0.55:
                 is_crying = True
                 if spectral_centroid > 2500 and rms > 0.3:
-                    cry_type = "distress"
+                    cry_type = "고통"
                 elif rms > 0.25:
-                    cry_type = "hunger"
+                    cry_type = "배고픔"
                 else:
-                    cry_type = "fussing"
+                    cry_type = "칭얼거림"
 
         # --- Breathing detection ---
         breathing_detected = False
@@ -190,14 +190,14 @@ class AudioAnalyzer:
         # --- Build description ---
         desc_parts = []
         if is_crying:
-            desc_parts.append(f"Crying [{cry_type}] (conf={cry_confidence:.0%}, RMS={rms:.3f})")
+            desc_parts.append(f"울음 [{cry_type}] (확신도={cry_confidence:.0%}, RMS={rms:.3f})")
         if breathing_detected:
-            desc_parts.append(f"Breathing detected (~{breathing_rate:.0f} bpm)")
+            desc_parts.append(f"호흡 감지됨 (~{breathing_rate:.0f} bpm)")
         if not desc_parts:
             if rms < 0.003:
-                desc_parts.append("Quiet / no audio")
+                desc_parts.append("조용함 / 오디오 없음")
             else:
-                desc_parts.append(f"Ambient noise (RMS={rms:.3f})")
+                desc_parts.append(f"주변 소음 (RMS={rms:.3f})")
 
         return AudioStatus(
             is_crying=is_crying,

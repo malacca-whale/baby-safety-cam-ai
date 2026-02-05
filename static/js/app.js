@@ -29,7 +29,7 @@ setTimeout(() => {
 videoFeed.onload = () => videoOverlay.classList.remove('visible');
 videoFeed.onerror = () => {
     videoOverlay.classList.add('visible');
-    videoOverlay.innerHTML = '<span>Camera disconnected</span>';
+    videoOverlay.innerHTML = '<span>카메라 연결 끊김</span>';
     connectionStatus.classList.add('disconnected');
 };
 
@@ -104,16 +104,16 @@ document.getElementById('micSelect').addEventListener('change', async (e) => {
 
 document.getElementById('testAlertBtn').addEventListener('click', async () => {
     const btn = document.getElementById('testAlertBtn');
-    btn.disabled = true; btn.textContent = 'Sending...';
+    btn.disabled = true; btn.textContent = '전송 중...';
     try { await fetch('/api/test_alert', { method: 'POST' }); } catch (err) {}
-    btn.disabled = false; btn.textContent = 'Test Alert';
+    btn.disabled = false; btn.textContent = '테스트 알림';
 });
 
 document.getElementById('forceReportBtn').addEventListener('click', async () => {
     const btn = document.getElementById('forceReportBtn');
-    btn.disabled = true; btn.textContent = 'Sending...';
+    btn.disabled = true; btn.textContent = '전송 중...';
     try { await fetch('/api/force_report', { method: 'POST' }); } catch (err) {}
-    btn.disabled = false; btn.textContent = 'Status Report';
+    btn.disabled = false; btn.textContent = '상태 보고';
 });
 
 // --- Status polling ---
@@ -124,16 +124,18 @@ async function updateStatus() {
 
         const baby = data.baby || {};
         const risk = baby.risk_level || 'safe';
-        riskBadge.textContent = risk.toUpperCase();
+        const riskKr = { safe: '안전', warning: '주의', danger: '위험' };
+        riskBadge.textContent = riskKr[risk] || risk.toUpperCase();
         riskBadge.className = 'risk-badge ' + risk;
-        babyPosition.textContent = `Position: ${baby.position || '--'}`;
-        babyInCrib.textContent = `In crib: ${baby.in_crib !== undefined ? (baby.in_crib ? 'Yes' : 'No') : '--'}`;
-        babyFace.textContent = `Face covered: ${baby.face_covered !== undefined ? (baby.face_covered ? 'YES' : 'No') : '--'}`;
+        const posKr = { supine: '등(안전)', prone: '엎드림(위험)', side: '옆으로', sitting: '앉음', unknown: '알 수 없음' };
+        babyPosition.textContent = `자세: ${posKr[baby.position] || baby.position || '--'}`;
+        babyInCrib.textContent = `침대 안: ${baby.in_crib !== undefined ? (baby.in_crib ? '예' : '아니오') : '--'}`;
+        babyFace.textContent = `얼굴 가려짐: ${baby.face_covered !== undefined ? (baby.face_covered ? '예!' : '아니오') : '--'}`;
         const extras = [];
-        if (baby.blanket_near_face) extras.push('Blanket near face');
-        if (baby.loose_objects) extras.push('Loose objects');
-        if (baby.eyes_open) extras.push('Eyes open');
-        if (!baby.baby_visible) extras.push('Baby NOT visible');
+        if (baby.blanket_near_face) extras.push('이불이 얼굴 근처');
+        if (baby.loose_objects) extras.push('위험 물체 있음');
+        if (baby.eyes_open) extras.push('눈 뜸');
+        if (!baby.baby_visible) extras.push('아기 안 보임');
         const extrasText = extras.length ? ` | ${extras.join(', ')}` : '';
         babyDesc.textContent = (baby.description || '--') + extrasText;
 
@@ -141,15 +143,15 @@ async function updateStatus() {
         babyCard.className = 'status-card' + (risk === 'danger' ? ' card-danger' : risk === 'warning' ? ' card-warning' : '');
 
         const motion = data.motion || {};
-        motionStatus.textContent = `Motion: ${motion.has_motion ? 'Yes' : 'No'}`;
-        motionMagnitude.textContent = `Magnitude: ${motion.motion_magnitude ?? '--'}`;
+        motionStatus.textContent = `움직임: ${motion.has_motion ? '있음' : '없음'}`;
+        motionMagnitude.textContent = `강도: ${motion.motion_magnitude ?? '--'}`;
         motionDesc.textContent = motion.description || '--';
 
         const audio = data.audio || {};
-        audioCrying.textContent = `Crying: ${audio.is_crying ? 'YES' : 'No'}`;
+        audioCrying.textContent = `울음: ${audio.is_crying ? '감지됨!' : '없음'}`;
         const brate = audio.breathing_rate ? ` (~${audio.breathing_rate} bpm)` : '';
-        audioBreathing.textContent = `Breathing: ${audio.breathing_detected ? 'Detected' + brate : 'Not detected'}`;
-        audioRms.textContent = `Level: ${audio.rms_level ?? '--'} | Centroid: ${audio.spectral_centroid ?? '--'}Hz`;
+        audioBreathing.textContent = `호흡: ${audio.breathing_detected ? '감지됨' + brate : '감지 안됨'}`;
+        audioRms.textContent = `레벨: ${audio.rms_level ?? '--'} | 스펙트럼: ${audio.spectral_centroid ?? '--'}Hz`;
         audioDesc.textContent = audio.description || '--';
 
         // Audio level meter
@@ -187,7 +189,7 @@ async function updateDiscordLog() {
     try {
         const rows = await (await fetch('/api/history/discord?limit=30')).json();
         const el = document.getElementById('discordLog');
-        if (!rows.length) { el.innerHTML = '<div class="log-empty">No Discord messages yet</div>'; return; }
+        if (!rows.length) { el.innerHTML = '<div class="log-empty">디스코드 메시지가 아직 없습니다</div>'; return; }
         el.innerHTML = rows.map(r => `
             <div class="log-item ${r.success ? '' : 'log-error'}">
                 <span class="log-time">${fmtTime(r.timestamp)}</span>
@@ -205,15 +207,16 @@ async function updateVisionLog() {
     try {
         const rows = await (await fetch('/api/history/vision?limit=30')).json();
         const el = document.getElementById('visionLog');
-        if (!rows.length) { el.innerHTML = '<div class="log-empty">No vision data yet</div>'; return; }
+        if (!rows.length) { el.innerHTML = '<div class="log-empty">영상 분석 데이터가 아직 없습니다</div>'; return; }
+        const posKr = { supine: '등', prone: '엎드림', side: '옆으로', sitting: '앉음', unknown: '알 수 없음' };
         el.innerHTML = rows.map(r => `
             <div class="log-item">
                 <span class="log-time">${fmtTime(r.timestamp)}</span>
                 ${riskDot(r.risk_level)}
-                <span class="log-badge">${r.position}</span>
+                <span class="log-badge">${posKr[r.position] || r.position}</span>
                 <span class="log-desc">${r.description || ''}</span>
-                ${r.face_covered ? '<span class="log-badge log-badge-err">FACE COVERED</span>' : ''}
-                ${!r.in_crib ? '<span class="log-badge log-badge-err">OUT OF CRIB</span>' : ''}
+                ${r.face_covered ? '<span class="log-badge log-badge-err">얼굴 가려짐</span>' : ''}
+                ${!r.in_crib ? '<span class="log-badge log-badge-err">침대 밖</span>' : ''}
             </div>`).join('');
     } catch (e) {}
 }
@@ -222,7 +225,7 @@ async function updateEventsLog() {
     try {
         const rows = await (await fetch('/api/history/events?limit=30')).json();
         const el = document.getElementById('eventsLog');
-        if (!rows.length) { el.innerHTML = '<div class="log-empty">No events yet</div>'; return; }
+        if (!rows.length) { el.innerHTML = '<div class="log-empty">이벤트가 아직 없습니다</div>'; return; }
         el.innerHTML = rows.map(r => {
             let desc = '';
             try { desc = r.data ? JSON.stringify(JSON.parse(r.data)).substring(0, 80) : ''; } catch(e) {}

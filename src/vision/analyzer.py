@@ -29,6 +29,8 @@ RISK LEVEL RULES:
 - "warning": position=side OR position=prone (awake/tummy time) OR blanket_near_face=true OR loose_objects=true OR in_crib=false
 - "safe": supine position, face clear, in crib, no loose objects
 
+IMPORTANT: Write the "description" field in Korean (한국어).
+
 Respond with ONLY a JSON object. No other text."""
 
 

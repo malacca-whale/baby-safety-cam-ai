@@ -33,7 +33,7 @@ class MotionDetector:
 
             if p0 is None or len(p0) == 0:
                 self.prev_gray = gray
-                return MotionStatus(description="No trackable features found")
+                return MotionStatus(description="추적 가능한 특징점 없음")
 
             p1, st, err = cv2.calcOpticalFlowPyrLK(
                 self.prev_gray, gray, p0, None, **self.lk_params
@@ -58,13 +58,13 @@ class MotionDetector:
             has_motion = magnitude > 2.0
 
             if magnitude > 10.0:
-                desc = "Strong movement detected"
+                desc = "강한 움직임 감지됨"
             elif magnitude > 5.0:
-                desc = "Moderate movement detected"
+                desc = "중간 움직임 감지됨"
             elif has_motion:
-                desc = "Slight movement detected"
+                desc = "약간의 움직임 감지됨"
             else:
-                desc = "No significant movement"
+                desc = "의미 있는 움직임 없음"
 
             self.prev_gray = gray
             return MotionStatus(

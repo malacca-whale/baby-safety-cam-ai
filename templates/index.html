@@ -3,27 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Baby Monitor</title>
+    <title>아기 모니터</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Baby Monitor</h1>
+            <h1>아기 모니터</h1>
             <div class="status-indicator" id="connectionStatus">
-                <span class="dot"></span> Connected
+                <span class="dot"></span> 연결됨
             </div>
         </header>
 
         <main>
             <section class="video-section">
                 <div class="video-wrapper">
-                    <img id="videoFeed" src="/video_feed" alt="Baby Camera Feed">
+                    <img id="videoFeed" src="/video_feed" alt="아기 카메라 피드">
                     <div class="video-overlay" id="videoOverlay">
-                        <span>Loading camera...</span>
+                        <span>카메라 로딩 중...</span>
                     </div>
                     <!-- Audio listen button overlay -->
-                    <button id="audioToggleBtn" class="audio-toggle" title="Listen to audio">
+                    <button id="audioToggleBtn" class="audio-toggle" title="오디오 듣기">
                         <span id="audioIcon">&#128266;</span>
                     </button>
                     <div class="audio-level-bar">
@@ -34,59 +34,59 @@
 
             <section class="controls-section">
                 <div class="control-group">
-                    <label for="cameraSelect">Camera</label>
+                    <label for="cameraSelect">카메라</label>
                     <select id="cameraSelect">
                         {% for cam in cameras %}
                         <option value="{{ cam.id }}">{{ cam.name }} ({{ cam.resolution }})</option>
                         {% endfor %}
                         {% if not cameras %}
-                        <option value="0">No cameras found</option>
+                        <option value="0">카메라를 찾을 수 없음</option>
                         {% endif %}
                     </select>
                 </div>
 
                 <div class="control-group">
-                    <label for="micSelect">Microphone</label>
+                    <label for="micSelect">마이크</label>
                     <select id="micSelect">
                         {% for mic in microphones %}
                         <option value="{{ mic.id }}">{{ mic.name }}</option>
                         {% endfor %}
                         {% if not microphones %}
-                        <option value="0">No microphones found</option>
+                        <option value="0">마이크를 찾을 수 없음</option>
                         {% endif %}
                     </select>
                 </div>
 
                 <div class="button-group">
-                    <button id="testAlertBtn" class="btn btn-warning">Test Alert</button>
-                    <button id="forceReportBtn" class="btn btn-info">Status Report</button>
+                    <button id="testAlertBtn" class="btn btn-warning">테스트 알림</button>
+                    <button id="forceReportBtn" class="btn btn-info">상태 보고</button>
                 </div>
             </section>
 
             <section class="status-section">
-                <h2>Live Status</h2>
+                <h2>실시간 상태</h2>
                 <div class="status-grid">
                     <div class="status-card" id="babyCard">
-                        <h3>Baby</h3>
-                        <div class="risk-badge" id="riskBadge">SAFE</div>
-                        <p id="babyPosition">Position: --</p>
-                        <p id="babyInCrib">In crib: --</p>
-                        <p id="babyFace">Face covered: --</p>
+                        <h3>아기</h3>
+                        <div class="risk-badge" id="riskBadge">안전</div>
+                        <p id="babyPosition">자세: --</p>
+                        <p id="babyInCrib">침대 안: --</p>
+                        <p id="babyFace">얼굴 가려짐: --</p>
                         <p id="babyDesc" class="desc">--</p>
                     </div>
 
                     <div class="status-card" id="motionCard">
-                        <h3>Motion</h3>
-                        <p id="motionStatus">Motion: --</p>
-                        <p id="motionMagnitude">Magnitude: --</p>
+                        <h3>움직임</h3>
+                        <p id="motionStatus">움직임: --</p>
+                        <p id="motionMagnitude">강도: --</p>
                         <p id="motionDesc" class="desc">--</p>
                     </div>
 
                     <div class="status-card" id="audioCard">
-                        <h3>Audio</h3>
-                        <p id="audioCrying">Crying: --</p>
-                        <p id="audioBreathing">Breathing: --</p>
-                        <p id="audioRms">Level: --</p>
+                        <h3>오디오</h3>
+                        <p id="audioCrying">울음: --</p>
+                        <p id="audioBreathing">호흡: --</p>
+                        <p id="audioRms">레벨: --</p>
                         <p id="audioDesc" class="desc">--</p>
                     </div>
                 </div>
@@ -94,23 +94,23 @@
 
             <!-- Stats -->
             <section class="stats-section">
-                <h2>Statistics</h2>
+                <h2>통계</h2>
                 <div class="stats-bar" id="statsBar">
-                    <span>Vision: <b id="statVision">0</b></span>
-                    <span>Motion: <b id="statMotion">0</b></span>
-                    <span>Audio: <b id="statAudio">0</b></span>
-                    <span>Discord: <b id="statDiscord">0</b></span>
-                    <span>Alerts: <b id="statAlerts">0</b></span>
-                    <span>Cries: <b id="statCries">0</b></span>
+                    <span>영상분석: <b id="statVision">0</b></span>
+                    <span>움직임: <b id="statMotion">0</b></span>
+                    <span>오디오: <b id="statAudio">0</b></span>
+                    <span>디스코드: <b id="statDiscord">0</b></span>
+                    <span>알림: <b id="statAlerts">0</b></span>
+                    <span>울음: <b id="statCries">0</b></span>
                 </div>
             </section>
 
             <!-- Tabs for History -->
             <section class="history-section">
                 <div class="tab-bar">
-                    <button class="tab active" data-tab="discord">Discord Log</button>
-                    <button class="tab" data-tab="vision">Vision</button>
-                    <button class="tab" data-tab="events">Events</button>
+                    <button class="tab active" data-tab="discord">디스코드 로그</button>
+                    <button class="tab" data-tab="vision">영상 분석</button>
+                    <button class="tab" data-tab="events">이벤트</button>
                 </div>
 
                 <div class="tab-content active" id="tab-discord">

@@ -38,7 +38,8 @@ class DiscordAlert:
                 color=int(color, 16),
             )
             embed.set_timestamp(datetime.now().isoformat())
-            embed.add_embed_field(name="Risk Level", value=risk_level.upper(), inline=True)
+            risk_kr = {"safe": "안전", "warning": "주의", "danger": "위험"}
+            embed.add_embed_field(name="위험 수준", value=risk_kr.get(risk_level, risk_level.upper()), inline=True)
 
             has_image = False
             if frame is not None:
@@ -73,7 +74,7 @@ class DiscordAlert:
         try:
             webhook = DiscordWebhook(url=self.status_url)
             embed = DiscordEmbed(
-                title="📊 Baby Status Report",
+                title="📊 아기 상태 보고서",
                 description=summary,
                 color=int("3498db", 16),
             )
@@ -92,7 +93,7 @@ class DiscordAlert:
             logger.info("Status report sent")
 
             self.db.log_discord_message(
-                channel="status", title="Baby Status Report",
+                channel="status", title="아기 상태 보고서",
                 description=summary, has_image=has_image, success=True,
             )
             self.db.log_event("discord_status", "info", {"summary": summary[:200]})
@@ -101,7 +102,7 @@ class DiscordAlert:
         except Exception as e:
             logger.error(f"Failed to send status report: {e}")
             self.db.log_discord_message(
-                channel="status", title="Baby Status Report",
+                channel="status", title="아기 상태 보고서",
                 description=summary, success=False, error=str(e),
             )
             return None
