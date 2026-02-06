@@ -83,18 +83,22 @@ node_modules/
 package-lock.json
 yarn.lock
 
-# Media (Images, Video, Audio)
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.mp4
-*.avi
-*.mov
-*.mkv
-*.webm
-*.wav
-*.mp3
+# Media (Images, Video, Audio) - root level only
+/*.png
+/*.jpg
+/*.jpeg
+/*.gif
+/*.mp4
+/*.avi
+/*.mov
+/*.mkv
+/*.webm
+/*.wav
+/*.mp3
+
+# Allow docs images
+!docs/images/*.png
+!docs/images/*.jpg
 
 # AI Models & Data
 *.pt

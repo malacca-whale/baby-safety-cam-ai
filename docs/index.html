@@ -10,18 +10,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #0a0a0f;
-            --bg-secondary: #12121a;
-            --bg-card: #1a1a24;
-            --text-primary: #f4f4f5;
-            --text-secondary: #a1a1aa;
-            --text-muted: #71717a;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
             --accent: #6366f1;
-            --accent-hover: #818cf8;
-            --success: #22c55e;
+            --accent-light: #eef2ff;
+            --accent-hover: #4f46e5;
+            --success: #10b981;
+            --success-light: #d1fae5;
             --warning: #f59e0b;
+            --warning-light: #fef3c7;
             --danger: #ef4444;
-            --border: #27272a;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
         }
 
         * {
@@ -38,7 +43,7 @@
             font-family: 'Noto Sans KR', 'Inter', -apple-system, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
-            line-height: 1.6;
+            line-height: 1.7;
         }
 
         /* Header */
@@ -48,7 +53,7 @@
             left: 0;
             right: 0;
             z-index: 100;
-            background: rgba(10, 10, 15, 0.8);
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
         }
@@ -69,18 +74,19 @@
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .logo-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, var(--accent), #a855f7);
-            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #a855f7, var(--accent));
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1rem;
+            font-size: 1.1rem;
+            color: white;
         }
 
         .nav-links {
@@ -92,28 +98,29 @@
         .nav-links a {
             color: var(--text-secondary);
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             font-weight: 500;
             transition: color 0.2s;
         }
 
         .nav-links a:hover {
-            color: var(--text-primary);
+            color: var(--accent);
         }
 
         .nav-cta {
-            background: var(--accent);
+            background: var(--text-primary);
             color: white;
             padding: 10px 20px;
-            border-radius: 8px;
+            border-radius: 10px;
             text-decoration: none;
             font-weight: 600;
             font-size: 0.9rem;
-            transition: background 0.2s;
+            transition: all 0.2s;
         }
 
         .nav-cta:hover {
-            background: var(--accent-hover);
+            background: var(--accent);
+            transform: translateY(-1px);
         }
 
         /* Hero */
@@ -124,17 +131,17 @@
             padding: 120px 24px 80px;
             position: relative;
             overflow: hidden;
+            background: linear-gradient(180deg, var(--accent-light) 0%, var(--bg-primary) 100%);
         }
 
         .hero::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 800px;
-            height: 800px;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+            top: -200px;
+            right: -200px;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 70%);
             pointer-events: none;
         }
 
@@ -147,14 +154,25 @@
             align-items: center;
         }
 
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--success-light);
+            color: #059669;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
         .hero-text h1 {
-            font-size: 3.5rem;
+            font-size: 3.2rem;
             font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 24px;
-            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            line-height: 1.15;
+            margin-bottom: 20px;
+            color: var(--text-primary);
         }
 
         .hero-text h1 span {
@@ -164,20 +182,21 @@
         }
 
         .hero-text p {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             color: var(--text-secondary);
             margin-bottom: 32px;
-            max-width: 500px;
+            max-width: 480px;
         }
 
         .hero-buttons {
             display: flex;
             gap: 16px;
+            flex-wrap: wrap;
         }
 
         .btn {
             padding: 14px 28px;
-            border-radius: 10px;
+            border-radius: 12px;
             font-weight: 600;
             font-size: 1rem;
             text-decoration: none;
@@ -190,22 +209,24 @@
         .btn-primary {
             background: var(--accent);
             color: white;
+            box-shadow: var(--shadow);
         }
 
         .btn-primary:hover {
             background: var(--accent-hover);
             transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
         }
 
         .btn-secondary {
             background: var(--bg-card);
             color: var(--text-primary);
-            border: 1px solid var(--border);
+            border: 2px solid var(--border);
         }
 
         .btn-secondary:hover {
-            background: var(--bg-secondary);
-            border-color: var(--text-muted);
+            border-color: var(--accent);
+            color: var(--accent);
         }
 
         .hero-image {
@@ -214,8 +235,8 @@
 
         .hero-image img {
             width: 100%;
-            border-radius: 16px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
             border: 1px solid var(--border);
         }
 
@@ -223,24 +244,25 @@
             position: absolute;
             background: var(--bg-card);
             border: 1px solid var(--border);
-            padding: 12px 16px;
-            border-radius: 12px;
+            padding: 12px 18px;
+            border-radius: 14px;
             font-size: 0.85rem;
+            font-weight: 500;
             display: flex;
             align-items: center;
-            gap: 8px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            gap: 10px;
+            box-shadow: var(--shadow-lg);
         }
 
         .floating-badge.safe {
-            bottom: 20px;
-            left: -30px;
+            bottom: 30px;
+            left: -20px;
             animation: float 3s ease-in-out infinite;
         }
 
         .floating-badge.alert {
-            top: 40px;
-            right: -20px;
+            top: 50px;
+            right: -10px;
             animation: float 3s ease-in-out infinite 0.5s;
         }
 
@@ -251,17 +273,16 @@
         }
 
         .badge-dot.green { background: var(--success); }
-        .badge-dot.yellow { background: var(--warning); }
+        .badge-dot.purple { background: var(--accent); }
 
         @keyframes float {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-8px); }
         }
 
-        /* Features */
-        .features {
+        /* Section common */
+        section {
             padding: 100px 24px;
-            background: var(--bg-secondary);
         }
 
         .section-header {
@@ -271,10 +292,10 @@
 
         .section-tag {
             display: inline-block;
-            background: rgba(99, 102, 241, 0.1);
+            background: var(--accent-light);
             color: var(--accent);
-            padding: 6px 16px;
-            border-radius: 20px;
+            padding: 8px 18px;
+            border-radius: 50px;
             font-size: 0.85rem;
             font-weight: 600;
             margin-bottom: 16px;
@@ -284,6 +305,7 @@
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 16px;
+            color: var(--text-primary);
         }
 
         .section-header p {
@@ -291,6 +313,11 @@
             font-size: 1.1rem;
             max-width: 600px;
             margin: 0 auto;
+        }
+
+        /* Features */
+        .features {
+            background: var(--bg-secondary);
         }
 
         .features-grid {
@@ -304,7 +331,7 @@
         .feature-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 32px;
             transition: all 0.3s;
         }
@@ -312,87 +339,183 @@
         .feature-card:hover {
             border-color: var(--accent);
             transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
         }
 
         .feature-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: 12px;
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             margin-bottom: 20px;
         }
 
-        .feature-icon.vision { background: rgba(99, 102, 241, 0.15); }
-        .feature-icon.motion { background: rgba(34, 197, 94, 0.15); }
-        .feature-icon.audio { background: rgba(245, 158, 11, 0.15); }
-        .feature-icon.discord { background: rgba(88, 101, 242, 0.15); }
-        .feature-icon.realtime { background: rgba(236, 72, 153, 0.15); }
-        .feature-icon.db { background: rgba(6, 182, 212, 0.15); }
+        .feature-icon.vision { background: linear-gradient(135deg, #eef2ff, #e0e7ff); }
+        .feature-icon.motion { background: linear-gradient(135deg, #d1fae5, #a7f3d0); }
+        .feature-icon.audio { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+        .feature-icon.discord { background: linear-gradient(135deg, #ede9fe, #ddd6fe); }
+        .feature-icon.realtime { background: linear-gradient(135deg, #fce7f3, #fbcfe8); }
+        .feature-icon.db { background: linear-gradient(135deg, #cffafe, #a5f3fc); }
 
         .feature-card h3 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-primary);
         }
 
         .feature-card p {
             color: var(--text-secondary);
             font-size: 0.95rem;
+            line-height: 1.6;
         }
 
-        /* How it works */
-        .how-it-works {
-            padding: 100px 24px;
+        /* Tech Stack - Detailed */
+        .tech-stack {
+            background: var(--bg-primary);
         }
 
-        .steps {
-            max-width: 900px;
+        .tech-categories {
+            max-width: 1000px;
             margin: 0 auto;
             display: flex;
             flex-direction: column;
             gap: 40px;
         }
 
-        .step {
-            display: flex;
-            gap: 24px;
-            align-items: flex-start;
+        .tech-category {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px;
         }
 
-        .step-number {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, var(--accent), #a855f7);
-            border-radius: 50%;
+        .tech-category h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tech-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .tech-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+
+        .tech-item:hover {
+            background: var(--accent-light);
+        }
+
+        .tech-item .icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
+            background: var(--bg-card);
             flex-shrink: 0;
         }
 
-        .step-content h3 {
-            font-size: 1.3rem;
+        .tech-item .info h4 {
+            font-size: 0.95rem;
             font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .tech-item .info p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Open Source Section */
+        .opensource {
+            background: var(--bg-secondary);
+        }
+
+        .opensource-grid {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .opensource-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            transition: all 0.2s;
+        }
+
+        .opensource-card:hover {
+            border-color: var(--accent);
+            box-shadow: var(--shadow);
+        }
+
+        .opensource-card .icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .opensource-card .content h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .opensource-card .content p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
             margin-bottom: 8px;
         }
 
-        .step-content p {
-            color: var(--text-secondary);
+        .opensource-card .tag {
+            display: inline-block;
+            background: var(--bg-secondary);
+            color: var(--text-muted);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
         }
 
         /* Screenshots */
         .screenshots {
-            padding: 100px 24px;
-            background: var(--bg-secondary);
+            background: var(--bg-primary);
         }
 
         .screenshots-grid {
-            max-width: 1200px;
+            max-width: 1100px;
             margin: 0 auto;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -402,8 +525,15 @@
         .screenshot-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 16px;
+            border-radius: 20px;
             overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+        }
+
+        .screenshot-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
         }
 
         .screenshot-card img {
@@ -412,12 +542,13 @@
         }
 
         .screenshot-card .caption {
-            padding: 20px;
+            padding: 24px;
         }
 
         .screenshot-card .caption h3 {
-            font-size: 1.1rem;
-            margin-bottom: 4px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 6px;
         }
 
         .screenshot-card .caption p {
@@ -425,53 +556,74 @@
             font-size: 0.9rem;
         }
 
-        /* Tech Stack */
-        .tech-stack {
-            padding: 100px 24px;
+        /* How it works */
+        .how-it-works {
+            background: var(--bg-secondary);
         }
 
-        .tech-grid {
-            max-width: 1000px;
+        .steps {
+            max-width: 800px;
             margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .step {
+            display: flex;
             gap: 24px;
-        }
-
-        .tech-item {
+            align-items: flex-start;
             background: var(--bg-card);
+            padding: 28px;
+            border-radius: 20px;
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 24px;
-            text-align: center;
-            transition: border-color 0.2s;
+            transition: all 0.2s;
         }
 
-        .tech-item:hover {
-            border-color: var(--text-muted);
+        .step:hover {
+            border-color: var(--accent);
+            box-shadow: var(--shadow);
         }
 
-        .tech-item .icon {
-            font-size: 2rem;
-            margin-bottom: 12px;
+        .step-number {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, var(--accent), #a855f7);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: white;
+            flex-shrink: 0;
         }
 
-        .tech-item h4 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 4px;
+        .step-content h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 8px;
         }
 
-        .tech-item p {
-            color: var(--text-muted);
-            font-size: 0.8rem;
+        .step-content p {
+            color: var(--text-secondary);
+        }
+
+        .step-content code {
+            display: inline-block;
+            background: var(--bg-secondary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.85rem;
+            color: var(--accent);
+            margin-top: 8px;
         }
 
         /* CTA */
         .cta {
-            padding: 100px 24px;
             text-align: center;
-            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--accent-light) 100%);
         }
 
         .cta h2 {
@@ -496,15 +648,17 @@
             text-align: center;
             color: var(--text-muted);
             font-size: 0.9rem;
+            background: var(--bg-primary);
         }
 
         footer a {
             color: var(--text-secondary);
             text-decoration: none;
+            font-weight: 500;
         }
 
         footer a:hover {
-            color: var(--text-primary);
+            color: var(--accent);
         }
 
         /* Responsive */
@@ -515,7 +669,7 @@
             }
 
             .hero-text h1 {
-                font-size: 2.5rem;
+                font-size: 2.2rem;
             }
 
             .hero-text p {
@@ -525,6 +679,11 @@
 
             .hero-buttons {
                 justify-content: center;
+            }
+
+            .hero-badge {
+                margin-left: auto;
+                margin-right: auto;
             }
 
             .floating-badge {
@@ -539,12 +698,16 @@
                 grid-template-columns: 1fr;
             }
 
-            .tech-grid {
-                grid-template-columns: repeat(2, 1fr);
+            .opensource-grid {
+                grid-template-columns: 1fr;
             }
 
             .nav-links {
                 display: none;
+            }
+
+            .section-header h2 {
+                font-size: 1.8rem;
             }
         }
     </style>
@@ -558,9 +721,9 @@
             </a>
             <ul class="nav-links">
                 <li><a href="#features">기능</a></li>
-                <li><a href="#how-it-works">작동 방식</a></li>
-                <li><a href="#screenshots">스크린샷</a></li>
                 <li><a href="#tech">기술 스택</a></li>
+                <li><a href="#screenshots">스크린샷</a></li>
+                <li><a href="#how-it-works">설치 방법</a></li>
             </ul>
             <a href="https://github.com/malacca-whale/baby-safety-cam-ai" class="nav-cta">GitHub</a>
         </nav>
@@ -569,14 +732,17 @@
     <section class="hero">
         <div class="hero-content">
             <div class="hero-text">
+                <div class="hero-badge">
+                    <span>&#9989;</span> 100% 오픈소스 &bull; 로컬 AI
+                </div>
                 <h1>AI가 지켜보는<br><span>아기의 안전</span></h1>
-                <p>비전 AI와 오디오 분석으로 아기의 상태를 24시간 모니터링하고, 위험 상황 발생 시 Discord로 즉각 알림을 보내드립니다.</p>
+                <p>Ollama 비전 AI와 오디오 분석으로 아기의 상태를 24시간 모니터링합니다. 위험 상황 발생 시 Discord로 즉각 알림을 보내드립니다.</p>
                 <div class="hero-buttons">
                     <a href="https://github.com/malacca-whale/baby-safety-cam-ai" class="btn btn-primary">
-                        &#128187; GitHub에서 보기
+                        GitHub에서 시작하기
                     </a>
                     <a href="#features" class="btn btn-secondary">
-                        자세히 알아보기 &#8594;
+                        기능 살펴보기
                     </a>
                 </div>
             </div>
@@ -587,7 +753,7 @@
                     안전 - 정상 수면 중
                 </div>
                 <div class="floating-badge alert">
-                    <span class="badge-dot yellow"></span>
+                    <span class="badge-dot purple"></span>
                     Discord 알림 전송됨
                 </div>
             </div>
@@ -604,12 +770,12 @@
             <div class="feature-card">
                 <div class="feature-icon vision">&#128065;</div>
                 <h3>비전 AI 분석</h3>
-                <p>Ollama Qwen3-VL 모델이 아기의 자세, 얼굴 가림, 침대 이탈을 실시간으로 분석하고 위험도를 평가합니다.</p>
+                <p>Ollama + Qwen3-VL 모델이 아기의 자세, 얼굴 가림, 침대 이탈을 실시간으로 분석하고 위험도를 평가합니다.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon motion">&#127939;</div>
                 <h3>움직임 감지</h3>
-                <p>Lucas-Kanade Optical Flow 알고리즘으로 아기의 움직임을 15FPS로 추적하고 패턴을 분석합니다.</p>
+                <p>OpenCV Lucas-Kanade Optical Flow 알고리즘으로 아기의 움직임을 15FPS로 추적하고 패턴을 분석합니다.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon audio">&#127908;</div>
@@ -634,39 +800,152 @@
         </div>
     </section>
 
-    <section class="how-it-works" id="how-it-works">
+    <section class="tech-stack" id="tech">
         <div class="section-header">
-            <span class="section-tag">작동 방식</span>
-            <h2>간단한 4단계 설정</h2>
-            <p>몇 분 만에 AI 아기 모니터링 시스템을 시작할 수 있습니다</p>
+            <span class="section-tag">기술 스택</span>
+            <h2>검증된 오픈소스 기술</h2>
+            <p>모두 무료 오픈소스 기술로 구축되었습니다</p>
         </div>
-        <div class="steps">
-            <div class="step">
-                <div class="step-number">1</div>
-                <div class="step-content">
-                    <h3>프로젝트 설치</h3>
-                    <p>GitHub에서 프로젝트를 클론하고 uv로 의존성을 설치합니다. Python 3.11+와 Ollama가 필요합니다.</p>
+        <div class="tech-categories">
+            <div class="tech-category">
+                <h3>&#129302; AI / Machine Learning</h3>
+                <div class="tech-list">
+                    <div class="tech-item">
+                        <div class="icon">&#129302;</div>
+                        <div class="info">
+                            <h4>Ollama</h4>
+                            <p>로컬 LLM 추론 엔진</p>
+                        </div>
+                    </div>
+                    <div class="tech-item">
+                        <div class="icon">&#128065;</div>
+                        <div class="info">
+                            <h4>Qwen3-VL</h4>
+                            <p>멀티모달 비전 언어 모델</p>
+                        </div>
+                    </div>
+                    <div class="tech-item">
+                        <div class="icon">&#128247;</div>
+                        <div class="info">
+                            <h4>OpenCV</h4>
+                            <p>컴퓨터 비전 라이브러리</p>
+                        </div>
+                    </div>
+                    <div class="tech-item">
+                        <div class="icon">&#127925;</div>
+                        <div class="info">
+                            <h4>Librosa</h4>
+                            <p>오디오 분석 라이브러리</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="step">
-                <div class="step-number">2</div>
-                <div class="step-content">
-                    <h3>AI 모델 다운로드</h3>
-                    <p>Ollama를 통해 Qwen3-VL 비전 모델을 다운로드합니다. 한 줄 명령어로 완료됩니다.</p>
+            <div class="tech-category">
+                <h3>&#128295; Backend / Infrastructure</h3>
+                <div class="tech-list">
+                    <div class="tech-item">
+                        <div class="icon">&#128013;</div>
+                        <div class="info">
+                            <h4>Python 3.11</h4>
+                            <p>메인 프로그래밍 언어</p>
+                        </div>
+                    </div>
+                    <div class="tech-item">
+                        <div class="icon">&#128293;</div>
+                        <div class="info">
+                            <h4>Flask</h4>
+                            <p>경량 웹 프레임워크</p>
+                        </div>
+                    </div>
+                    <div class="tech-item">
+                        <div class="icon">&#9889;</div>
+                        <div class="info">
+                            <h4>Flask-SocketIO</h4>
+                            <p>실시간 WebSocket 통신</p>
+                        </div>
+                    </div>
+                    <div class="tech-item">
+                        <div class="icon">&#128451;</div>
+                        <div class="info">
+                            <h4>SQLite</h4>
+                            <p>경량 데이터베이스</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="step">
-                <div class="step-number">3</div>
-                <div class="step-content">
-                    <h3>Discord 웹훅 설정</h3>
-                    <p>Discord 서버에 웹훅을 만들고 .env 파일에 URL을 입력합니다. 경고용과 상태 보고용 두 개의 채널을 사용합니다.</p>
+            <div class="tech-category">
+                <h3>&#128230; 패키지 관리 / 통합</h3>
+                <div class="tech-list">
+                    <div class="tech-item">
+                        <div class="icon">&#128230;</div>
+                        <div class="info">
+                            <h4>uv</h4>
+                            <p>초고속 Python 패키지 매니저</p>
+                        </div>
+                    </div>
+                    <div class="tech-item">
+                        <div class="icon">&#128172;</div>
+                        <div class="info">
+                            <h4>Discord Webhook</h4>
+                            <p>알림 전송 시스템</p>
+                        </div>
+                    </div>
+                    <div class="tech-item">
+                        <div class="icon">&#128100;</div>
+                        <div class="info">
+                            <h4>Pydantic</h4>
+                            <p>데이터 검증 라이브러리</p>
+                        </div>
+                    </div>
+                    <div class="tech-item">
+                        <div class="icon">&#127760;</div>
+                        <div class="info">
+                            <h4>httpx</h4>
+                            <p>비동기 HTTP 클라이언트</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="step">
-                <div class="step-number">4</div>
-                <div class="step-content">
-                    <h3>모니터링 시작</h3>
-                    <p>서버를 실행하고 웹 브라우저에서 대시보드에 접속합니다. 이제 AI가 아기를 24시간 모니터링합니다.</p>
+        </div>
+    </section>
+
+    <section class="opensource" id="opensource">
+        <div class="section-header">
+            <span class="section-tag">오픈소스</span>
+            <h2>핵심 오픈소스 프로젝트</h2>
+            <p>이 프로젝트에서 사용하는 주요 오픈소스입니다</p>
+        </div>
+        <div class="opensource-grid">
+            <div class="opensource-card">
+                <div class="icon" style="background: linear-gradient(135deg, #eef2ff, #e0e7ff);">&#129302;</div>
+                <div class="content">
+                    <h4>Ollama</h4>
+                    <p>로컬에서 LLM을 쉽게 실행할 수 있는 도구입니다. Qwen3-VL 모델을 통해 이미지 분석을 수행합니다.</p>
+                    <span class="tag">ollama.com</span>
+                </div>
+            </div>
+            <div class="opensource-card">
+                <div class="icon" style="background: linear-gradient(135deg, #fce7f3, #fbcfe8);">&#128065;</div>
+                <div class="content">
+                    <h4>Qwen3-VL</h4>
+                    <p>Alibaba의 비전-언어 멀티모달 모델입니다. 이미지를 이해하고 분석할 수 있습니다.</p>
+                    <span class="tag">Vision Language Model</span>
+                </div>
+            </div>
+            <div class="opensource-card">
+                <div class="icon" style="background: linear-gradient(135deg, #d1fae5, #a7f3d0);">&#128247;</div>
+                <div class="content">
+                    <h4>OpenCV</h4>
+                    <p>실시간 컴퓨터 비전 라이브러리입니다. Optical Flow로 움직임을 감지합니다.</p>
+                    <span class="tag">opencv.org</span>
+                </div>
+            </div>
+            <div class="opensource-card">
+                <div class="icon" style="background: linear-gradient(135deg, #fef3c7, #fde68a);">&#127925;</div>
+                <div class="content">
+                    <h4>Librosa</h4>
+                    <p>오디오 및 음악 분석 Python 라이브러리입니다. 울음 및 호흡 패턴을 감지합니다.</p>
+                    <span class="tag">librosa.org</span>
                 </div>
             </div>
         </div>
@@ -683,7 +962,7 @@
                 <img src="images/web-ui.png" alt="Web Dashboard">
                 <div class="caption">
                     <h3>웹 대시보드</h3>
-                    <p>실시간 비디오, 상태 카드, 히스토리를 한눈에 확인</p>
+                    <p>실시간 비디오, 상태 카드, 히스토리를 한눈에 확인할 수 있는 다크 모드 UI</p>
                 </div>
             </div>
             <div class="screenshot-card">
@@ -696,61 +975,53 @@
         </div>
     </section>
 
-    <section class="tech-stack" id="tech">
+    <section class="how-it-works" id="how-it-works">
         <div class="section-header">
-            <span class="section-tag">기술 스택</span>
-            <h2>검증된 기술로 구축</h2>
-            <p>안정적이고 효율적인 오픈소스 기술을 사용합니다</p>
+            <span class="section-tag">설치 방법</span>
+            <h2>간단한 4단계 설정</h2>
+            <p>몇 분 만에 AI 아기 모니터링 시스템을 시작할 수 있습니다</p>
         </div>
-        <div class="tech-grid">
-            <div class="tech-item">
-                <div class="icon">&#128013;</div>
-                <h4>Python 3.11</h4>
-                <p>백엔드</p>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>프로젝트 클론 및 의존성 설치</h3>
+                    <p>GitHub에서 프로젝트를 클론하고 uv로 의존성을 설치합니다.</p>
+                    <code>git clone ... && uv sync</code>
+                </div>
             </div>
-            <div class="tech-item">
-                <div class="icon">&#128293;</div>
-                <h4>Flask</h4>
-                <p>웹 프레임워크</p>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Ollama 설치 및 모델 다운로드</h3>
+                    <p>Ollama를 설치하고 Qwen3-VL 비전 모델을 다운로드합니다.</p>
+                    <code>ollama pull qwen3-vl:latest</code>
+                </div>
             </div>
-            <div class="tech-item">
-                <div class="icon">&#129302;</div>
-                <h4>Ollama</h4>
-                <p>로컬 AI 추론</p>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Discord 웹훅 설정</h3>
+                    <p>Discord 서버에 웹훅을 만들고 .env 파일에 URL을 입력합니다.</p>
+                    <code>cp .env.example .env</code>
+                </div>
             </div>
-            <div class="tech-item">
-                <div class="icon">&#128064;</div>
-                <h4>OpenCV</h4>
-                <p>컴퓨터 비전</p>
-            </div>
-            <div class="tech-item">
-                <div class="icon">&#127925;</div>
-                <h4>Librosa</h4>
-                <p>오디오 분석</p>
-            </div>
-            <div class="tech-item">
-                <div class="icon">&#128172;</div>
-                <h4>Discord</h4>
-                <p>알림 시스템</p>
-            </div>
-            <div class="tech-item">
-                <div class="icon">&#128451;</div>
-                <h4>SQLite</h4>
-                <p>데이터베이스</p>
-            </div>
-            <div class="tech-item">
-                <div class="icon">&#9889;</div>
-                <h4>SocketIO</h4>
-                <p>실시간 통신</p>
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h3>모니터링 시작!</h3>
+                    <p>서버를 실행하고 웹 브라우저에서 대시보드에 접속합니다.</p>
+                    <code>uv run python -m src.main</code>
+                </div>
             </div>
         </div>
     </section>
 
     <section class="cta">
         <h2>지금 바로 시작하세요</h2>
-        <p>오픈소스로 무료로 사용할 수 있습니다. GitHub에서 코드를 확인하고 직접 설치해보세요.</p>
+        <p>100% 오픈소스로 무료로 사용할 수 있습니다. GitHub에서 코드를 확인하고 직접 설치해보세요.</p>
         <a href="https://github.com/malacca-whale/baby-safety-cam-ai" class="btn btn-primary">
-            &#128187; GitHub에서 시작하기
+            GitHub에서 시작하기
         </a>
     </section>
 
