@@ -38,3 +38,6 @@ class CombinedStatus(BaseModel):
     motion: MotionStatus = MotionStatus()
     audio: AudioStatus = AudioStatus()
     timestamp: datetime | None = None
+    last_vision_update: datetime | None = None
+    last_motion_update: datetime | None = None
+    last_audio_update: datetime | None = None

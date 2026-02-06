@@ -159,6 +159,21 @@ async function updateStatus() {
         audioLevelFill.style.width = (rmsNorm * 100) + '%';
         audioLevelFill.style.background = audio.is_crying ? '#ef4444' : rmsNorm > 0.5 ? '#f59e0b' : '#22c55e';
 
+        // Update last update timestamps (KST)
+        const lastVisionEl = document.getElementById('lastVisionUpdate');
+        const lastMotionEl = document.getElementById('lastMotionUpdate');
+        const lastAudioEl = document.getElementById('lastAudioUpdate');
+        if (lastVisionEl) lastVisionEl.textContent = fmtDateTime(data.last_vision_update);
+        if (lastMotionEl) lastMotionEl.textContent = fmtDateTime(data.last_motion_update);
+        if (lastAudioEl) lastAudioEl.textContent = fmtDateTime(data.last_audio_update);
+
+        // Update video timestamp
+        const videoTs = document.getElementById('videoTimestamp');
+        if (videoTs) {
+            const now = new Date();
+            videoTs.textContent = '영상 스트리밍: ' + fmtDateTime(now.toISOString());
+        }
+
         connectionStatus.classList.remove('disconnected');
     } catch (err) {
         connectionStatus.classList.add('disconnected');
@@ -175,9 +190,44 @@ document.querySelectorAll('.tab').forEach(tab => {
     });
 });
 
+// --- Korean timezone (KST, UTC+9) formatting ---
+function toKST(ts) {
+    if (!ts) return null;
+    const d = new Date(ts);
+    // Force KST timezone
+    return new Date(d.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
+}
+
 function fmtTime(ts) {
     if (!ts) return '';
-    return new Date(ts).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const d = toKST(ts);
+    if (!d) return '';
+    return d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+}
+
+function fmtDateTime(ts) {
+    if (!ts) return '--';
+    const d = toKST(ts);
+    if (!d) return '--';
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const mins = String(d.getMinutes()).padStart(2, '0');
+    const secs = String(d.getSeconds()).padStart(2, '0');
+    return `${month}/${day} ${hours}:${mins}:${secs}`;
+}
+
+function fmtFullDateTime(ts) {
+    if (!ts) return '--';
+    const d = toKST(ts);
+    if (!d) return '--';
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const mins = String(d.getMinutes()).padStart(2, '0');
+    const secs = String(d.getSeconds()).padStart(2, '0');
+    return `${year}년 ${month}월 ${day}일 ${hours}:${mins}:${secs} (KST)`;
 }
 
 function riskDot(level) {

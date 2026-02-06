@@ -130,6 +130,8 @@ class Pipeline:
                     self._last_combined.baby = baby_status
                     self._last_combined.audio = audio_status
                     self._last_combined.timestamp = datetime.now()
+                    self._last_combined.last_vision_update = datetime.now()
+                    self._last_combined.last_audio_update = datetime.now()
 
                 motion_status = self._last_combined.motion
                 self.alert_manager.check_and_alert(baby_status, motion_status, frame)
@@ -156,6 +158,7 @@ class Pipeline:
                 motion_status = self.motion.detect(frame)
                 with self._lock:
                     self._last_combined.motion = motion_status
+                    self._last_combined.last_motion_update = datetime.now()
 
                 now = time.time()
                 if now - self._last_motion_log_time > self._motion_log_interval:
