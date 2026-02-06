@@ -87,7 +87,6 @@ package-lock.json
 yarn.lock
 
 # Media (Images, Video, Audio) - root level only
-/*.png
 /*.jpg
 /*.jpeg
 /*.gif
@@ -98,6 +97,36 @@ yarn.lock
 /*.webm
 /*.wav
 /*.mp3
+
+# Playwright screenshots (test artifacts)
+admin-check.png
+admin-fullpage.png
+admin-page-final-test.png
+admin-page-korean-prompt.png
+admin-page-plain-text.png
+admin-page.png
+baby-cam-final.png
+cloudflare-authorize.png
+current-page.png
+external-access-section.png
+external-access-url.png
+external-access.png
+external-broken.png
+external-current.png
+final-page.png
+final-ui-verification.png
+fixed-design.png
+github-pages-architecture.png
+github-pages-hero.png
+github-pages-home.png
+github-pages-mockups.png
+github-pages-preview.png
+main-page-test.png
+new-design-verified.png
+old-design-before-restart.png
+settings-panel-test.png
+still-broken.png
+updated-page.png
 
 # Allow docs images
 !docs/images/*.png
