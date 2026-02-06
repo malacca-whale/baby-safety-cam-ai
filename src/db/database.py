@@ -92,6 +92,12 @@ class Database:
                 created_at REAL NOT NULL
             );
 
+            CREATE TABLE IF NOT EXISTS config (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL,
+                updated_at REAL NOT NULL
+            );
+
             CREATE INDEX IF NOT EXISTS idx_events_type ON events(event_type);
             CREATE INDEX IF NOT EXISTS idx_events_ts ON events(created_at);
             CREATE INDEX IF NOT EXISTS idx_discord_channel ON discord_messages(channel);
@@ -101,7 +107,37 @@ class Database:
             CREATE INDEX IF NOT EXISTS idx_audio_ts ON audio_logs(created_at);
         """)
         conn.commit()
+        self._init_default_config()
         logger.info(f"Database initialized at {DB_PATH}")
+
+    def _init_default_config(self):
+        """Initialize default config values if not set."""
+        from src.vision.analyzer import DEFAULT_ANALYSIS_PROMPT
+        defaults = {
+            "vlm_prompt": DEFAULT_ANALYSIS_PROMPT,
+            "ai_camera_id": "0",
+        }
+        for key, value in defaults.items():
+            if self.get_config(key) is None:
+                self.set_config(key, value)
+
+    def get_config(self, key: str) -> str | None:
+        conn = self._get_conn()
+        row = conn.execute("SELECT value FROM config WHERE key = ?", (key,)).fetchone()
+        return row["value"] if row else None
+
+    def set_config(self, key: str, value: str):
+        conn = self._get_conn()
+        conn.execute(
+            "INSERT OR REPLACE INTO config (key, value, updated_at) VALUES (?, ?, ?)",
+            (key, value, time.time()),
+        )
+        conn.commit()
+
+    def get_all_config(self) -> dict[str, str]:
+        conn = self._get_conn()
+        rows = conn.execute("SELECT key, value FROM config").fetchall()
+        return {r["key"]: r["value"] for r in rows}
 
     def log_event(self, event_type: str, severity: str = "info", data: dict | None = None):
         now = datetime.now()

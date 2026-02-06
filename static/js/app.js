@@ -262,3 +262,106 @@ setInterval(updateStatus, 3000);
 setInterval(updateAllLogs, 5000);
 updateStatus();
 updateAllLogs();
+
+// --- Settings Section ---
+const settingsSection = document.getElementById('settingsSection');
+const settingsToggleBtn = document.getElementById('settingsToggleBtn');
+const vlmPromptTextarea = document.getElementById('vlmPromptTextarea');
+const aiCameraSelect = document.getElementById('aiCameraSelect');
+
+// Toggle settings visibility
+settingsToggleBtn.addEventListener('click', () => {
+    const isHidden = settingsSection.style.display === 'none';
+    settingsSection.style.display = isHidden ? 'block' : 'none';
+    settingsToggleBtn.textContent = isHidden ? '설정 닫기' : '설정';
+    if (isHidden) loadSettings();
+});
+
+// Load settings from server
+async function loadSettings() {
+    try {
+        const config = await (await fetch('/api/config')).json();
+        vlmPromptTextarea.value = config.vlm_prompt || '';
+        if (config.ai_camera_id !== undefined) {
+            aiCameraSelect.value = config.ai_camera_id;
+        }
+    } catch (e) {
+        console.error('Failed to load settings:', e);
+    }
+}
+
+// Save VLM prompt
+document.getElementById('savePromptBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('savePromptBtn');
+    const prompt = vlmPromptTextarea.value.trim();
+    if (!prompt) {
+        alert('프롬프트를 입력해주세요.');
+        return;
+    }
+    btn.disabled = true;
+    btn.textContent = '저장 중...';
+    try {
+        const resp = await fetch('/api/config/vlm_prompt', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ value: prompt }),
+        });
+        if (resp.ok) {
+            alert('프롬프트가 저장되었습니다. 다음 분석부터 적용됩니다.');
+        } else {
+            alert('저장 실패');
+        }
+    } catch (e) {
+        alert('저장 실패: ' + e);
+    }
+    btn.disabled = false;
+    btn.textContent = '프롬프트 저장';
+});
+
+// Reset VLM prompt to default
+document.getElementById('resetPromptBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('resetPromptBtn');
+    btn.disabled = true;
+    btn.textContent = '복원 중...';
+    try {
+        const defaultResp = await fetch('/api/config/vlm_prompt/default');
+        const defaultData = await defaultResp.json();
+        vlmPromptTextarea.value = defaultData.value;
+
+        await fetch('/api/config/vlm_prompt', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ value: defaultData.value }),
+        });
+        alert('기본 프롬프트로 복원되었습니다.');
+    } catch (e) {
+        alert('복원 실패: ' + e);
+    }
+    btn.disabled = false;
+    btn.textContent = '기본값 복원';
+});
+
+// Save AI camera selection
+document.getElementById('saveAiCameraBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('saveAiCameraBtn');
+    const cameraId = parseInt(aiCameraSelect.value);
+    btn.disabled = true;
+    btn.textContent = '저장 중...';
+    try {
+        const resp = await fetch('/api/switch_ai_camera', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ camera_id: cameraId }),
+        });
+        const data = await resp.json();
+        if (data.success) {
+            alert(`AI 카메라가 Camera ${cameraId}로 설정되었습니다.`);
+        } else {
+            alert('AI 카메라 설정 실패');
+        }
+    } catch (e) {
+        alert('설정 실패: ' + e);
+    }
+    btn.disabled = false;
+    btn.textContent = '저장';
+});

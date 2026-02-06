@@ -146,6 +146,59 @@ def get_stats():
     return jsonify(db.get_stats())
 
 
+# --- Config API ---
+
+@app.route("/api/config")
+def get_config():
+    """Get all config values."""
+    return jsonify(db.get_all_config())
+
+
+@app.route("/api/config/<key>")
+def get_config_key(key: str):
+    """Get a specific config value."""
+    value = db.get_config(key)
+    if value is None:
+        return jsonify({"error": "Config not found"}), 404
+    return jsonify({"key": key, "value": value})
+
+
+@app.route("/api/config/<key>", methods=["POST"])
+def set_config_key(key: str):
+    """Set a config value."""
+    data = request.json
+    value = data.get("value")
+    if value is None:
+        return jsonify({"error": "Value is required"}), 400
+
+    db.set_config(key, value)
+
+    # Handle special config changes
+    if key == "vlm_prompt" and pipeline.vision:
+        pipeline.vision.reload_prompt()
+    elif key == "ai_camera_id":
+        # Store the AI camera ID - pipeline will use it for analysis
+        db.log_event("config_change", "info", {"key": key, "value": value})
+
+    return jsonify({"success": True, "key": key, "value": value})
+
+
+@app.route("/api/config/vlm_prompt/default")
+def get_default_prompt():
+    """Get the default VLM prompt."""
+    from src.vision.analyzer import DEFAULT_ANALYSIS_PROMPT
+    return jsonify({"value": DEFAULT_ANALYSIS_PROMPT})
+
+
+@app.route("/api/switch_ai_camera", methods=["POST"])
+def switch_ai_camera():
+    """Switch the AI camera used for vision analysis."""
+    data = request.json
+    camera_id = data.get("camera_id", 0)
+    success = pipeline.switch_ai_camera(camera_id)
+    return jsonify({"success": success, "ai_camera_id": camera_id})
+
+
 # --- SocketIO events ---
 
 @socketio.on("connect")

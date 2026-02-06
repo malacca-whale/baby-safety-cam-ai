@@ -12,7 +12,7 @@ from src.db.database import Database
 
 logger = logging.getLogger(__name__)
 
-ANALYSIS_PROMPT = """You are a baby sleep safety monitor AI trained on SIDS prevention guidelines (AAP Safe Sleep recommendations).
+DEFAULT_ANALYSIS_PROMPT = """You are a baby sleep safety monitor AI trained on SIDS prevention guidelines (AAP Safe Sleep recommendations).
 
 Analyze this baby camera image carefully. Check ALL of the following safety conditions:
 
@@ -43,6 +43,18 @@ class VisionAnalyzer:
         self.last_status = BabyStatus()
         self._warmed_up = False
         self.db = Database()
+        self._cached_prompt: str | None = None
+
+    def get_prompt(self) -> str:
+        """Get the current VLM prompt from DB (with caching)."""
+        if self._cached_prompt is None:
+            self._cached_prompt = self.db.get_config("vlm_prompt") or DEFAULT_ANALYSIS_PROMPT
+        return self._cached_prompt
+
+    def reload_prompt(self):
+        """Force reload prompt from DB."""
+        self._cached_prompt = self.db.get_config("vlm_prompt") or DEFAULT_ANALYSIS_PROMPT
+        logger.info("VLM prompt reloaded from DB")
 
     def warmup(self):
         """Send a short text-only request to pre-load the model into memory."""
@@ -78,6 +90,7 @@ class VisionAnalyzer:
             _, buffer = cv2.imencode(".jpg", small, [cv2.IMWRITE_JPEG_QUALITY, 70])
             image_b64 = base64.b64encode(buffer).decode("utf-8")
 
+            prompt = self.get_prompt()
             response = self.client.post(
                 f"{Config.OLLAMA_URL}/api/chat",
                 json={
@@ -85,7 +98,7 @@ class VisionAnalyzer:
                     "messages": [
                         {
                             "role": "user",
-                            "content": ANALYSIS_PROMPT,
+                            "content": prompt,
                             "images": [image_b64],
                         }
                     ],
