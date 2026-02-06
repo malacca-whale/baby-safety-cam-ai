@@ -129,7 +129,7 @@ uv run python -m src.main
 ./scripts/run-tunnel.sh
 ```
 
-외부 접속 URL: `https://baby-cam-e9a2888148d3.cfargotunnel.com`
+외부 접속 URL: `https://baby-cam.malacca.work`
 
 ### 수동 설정 (선택사항)
 
