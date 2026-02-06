@@ -109,6 +109,46 @@ uv run python -m src.main
 
 브라우저에서 http://localhost:8080 접속
 
+## 외부 접속 (Cloudflare Tunnel)
+
+외부에서 접속 가능한 HTTPS URL을 무료로 생성할 수 있습니다.
+
+### 최초 설정 (한 번만)
+
+```bash
+# 설정 스크립트 실행
+./scripts/setup-tunnel.sh
+```
+
+브라우저가 열리면 Cloudflare 계정으로 로그인하세요 (무료 계정 가능).
+
+### 터널 실행
+
+```bash
+# 터널 시작
+./scripts/run-tunnel.sh
+```
+
+외부 접속 URL: `https://baby-cam-e9a2888148d3.cfargotunnel.com`
+
+### 수동 설정 (선택사항)
+
+```bash
+# 1. cloudflared 설치
+brew install cloudflared
+
+# 2. 로그인
+cloudflared tunnel login
+
+# 3. 터널 생성
+cloudflared tunnel create baby-cam-e9a2888148d3
+
+# 4. 터널 실행
+cloudflared tunnel --url http://localhost:8080 run baby-cam-e9a2888148d3
+```
+
+> **참고**: 터널은 `cloudflared`가 실행 중일 때만 외부 접속이 가능합니다. URL은 영구적으로 유지됩니다.
+
 ## 웹 UI 기능
 
 - **실시간 비디오 스트리밍**: MJPEG 방식의 저지연 영상
