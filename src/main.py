@@ -39,6 +39,12 @@ def index():
     return render_template("index.html", cameras=cameras, microphones=microphones)
 
 
+@app.route("/admin")
+def admin():
+    """Admin page for configuring VLM prompt and other settings."""
+    return render_template("admin.html")
+
+
 @app.route("/video_feed")
 def video_feed():
     def generate():

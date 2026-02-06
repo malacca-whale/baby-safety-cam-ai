@@ -8,12 +8,14 @@ class BabyStatus(BaseModel):
     position: Literal["supine", "prone", "side", "sitting", "unknown"] = "unknown"
     in_crib: bool = True
     risk_level: Literal["safe", "warning", "danger"] = "safe"
-    eyes_open: bool = False
+    eyes_open: bool | None = None
     loose_objects: bool = False
     blanket_near_face: bool = False
     baby_visible: bool = True
     description: str = ""
     timestamp: datetime | None = None
+    alert_channel: Literal["alert", "status"] = "status"
+    should_alert: bool = False
 
 
 class MotionStatus(BaseModel):

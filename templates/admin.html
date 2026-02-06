@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 설정 - Baby Safety Cam</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260206">
+    <style>
+        .admin-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            color: white;
+        }
+        .admin-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        .admin-header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+        .admin-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        .admin-section h2 {
+            margin: 0 0 1rem 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        .admin-section p {
+            margin: 0 0 1.5rem 0;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+        .prompt-editor {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            color: #e2e8f0;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            resize: vertical;
+            min-height: 400px;
+            width: 100%;
+        }
+        .prompt-editor:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .button-row {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .admin-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+        .admin-btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .admin-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        }
+        .admin-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .admin-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .admin-btn-home {
+            background: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        .admin-btn-home:hover {
+            background: rgba(34, 197, 94, 0.3);
+        }
+        .status-message {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+            font-weight: 500;
+        }
+        .status-message.success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #86efac;
+        }
+        .status-message.error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+        .info-box {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+        }
+        .info-box h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 0.95rem;
+            color: #93c5fd;
+            font-weight: 600;
+        }
+        .info-box ul {
+            margin: 0;
+            padding-left: 1.5rem;
+            color: #94a3b8;
+            line-height: 1.8;
+        }
+        .info-box code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.85rem;
+            color: #a5b4fc;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <span class="logo-icon">&#128118;</span>
+                    <span class="logo-text">Baby Safety Cam - 관리자</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="clock" id="clock">--:--:--</div>
+            </div>
+        </header>
+
+        <div class="admin-container">
+            <div class="admin-header">
+                <h1>&#9881; 관리자 설정</h1>
+                <p>AI 비전 분석 프롬프트를 수정하여 위험 감지 기준을 조정할 수 있습니다</p>
+            </div>
+
+            <div class="admin-section">
+                <h2>&#129302; VLM 프롬프트 설정</h2>
+                <p>
+                    아래 프롬프트는 Ollama VLM (Vision Language Model)에 전달되어 카메라 이미지를 분석합니다.
+                    분석 결과는 LLM이 읽고 위험도를 판단하여 적절한 Discord 채널(alert/status)로 전송됩니다.
+                </p>
+                <textarea id="vlmPrompt" class="prompt-editor" placeholder="프롬프트 로딩 중..."></textarea>
+
+                <div class="button-row">
+                    <button id="saveBtn" class="admin-btn admin-btn-primary">
+                        &#128190; 저장
+                    </button>
+                    <button id="resetBtn" class="admin-btn admin-btn-secondary">
+                        &#128260; 기본값으로 초기화
+                    </button>
+                    <button id="homeBtn" class="admin-btn admin-btn-home">
+                        &#127968; 메인으로
+                    </button>
+                </div>
+
+                <div id="statusMessage" class="status-message"></div>
+
+                <div class="info-box">
+                    <h3>&#128161; 프롬프트 작성 가이드</h3>
+                    <ul>
+                        <li>프롬프트는 <code>safe</code>, <code>warning</code>, <code>danger</code> 위험 수준을 구분할 수 있도록 작성하세요</li>
+                        <li>얼굴 가려짐, 엎드린 자세, 침대 밖 등 구체적인 위험 요소를 명시하세요</li>
+                        <li>LLM이 분석 결과를 읽고 판단하므로 자연스러운 한국어로 설명하도록 요청하세요</li>
+                        <li>변경사항은 즉시 적용되며, 다음 AI 분석부터 새 프롬프트가 사용됩니다</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <span>Baby Safety Cam AI &copy; 2024</span>
+            <span class="footer-sep">|</span>
+            <span>한국 시간 (KST)</span>
+        </footer>
+    </div>
+
+    <script>
+        // Clock
+        function updateClock() {
+            const now = new Date();
+            const kstTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
+            const hours = String(kstTime.getHours()).padStart(2, '0');
+            const minutes = String(kstTime.getMinutes()).padStart(2, '0');
+            const seconds = String(kstTime.getSeconds()).padStart(2, '0');
+            document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // Load current prompt
+        async function loadPrompt() {
+            try {
+                const response = await fetch('/api/config/vlm_prompt');
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('vlmPrompt').value = data.value || '';
+                } else {
+                    showStatus('프롬프트 로드 실패', 'error');
+                }
+            } catch (error) {
+                showStatus('프롬프트 로드 중 오류 발생', 'error');
+            }
+        }
+
+        // Save prompt
+        async function savePrompt() {
+            const prompt = document.getElementById('vlmPrompt').value;
+            if (!prompt.trim()) {
+                showStatus('프롬프트가 비어있습니다', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/config/vlm_prompt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ value: prompt })
+                });
+
+                if (response.ok) {
+                    showStatus('✓ 프롬프트가 저장되었습니다', 'success');
+                } else {
+                    showStatus('저장 실패', 'error');
+                }
+            } catch (error) {
+                showStatus('저장 중 오류 발생', 'error');
+            }
+        }
+
+        // Reset to default
+        async function resetPrompt() {
+            if (!confirm('기본 프롬프트로 초기화하시겠습니까?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/config/vlm_prompt/default');
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('vlmPrompt').value = data.value || '';
+
+                    // Save the default prompt
+                    await fetch('/api/config/vlm_prompt', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ value: data.value })
+                    });
+
+                    showStatus('✓ 기본 프롬프트로 초기화되었습니다', 'success');
+                } else {
+                    showStatus('초기화 실패', 'error');
+                }
+            } catch (error) {
+                showStatus('초기화 중 오류 발생', 'error');
+            }
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message ${type}`;
+            statusDiv.style.display = 'block';
+
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Event listeners
+        document.getElementById('saveBtn').addEventListener('click', savePrompt);
+        document.getElementById('resetBtn').addEventListener('click', resetPrompt);
+        document.getElementById('homeBtn').addEventListener('click', () => {
+            window.location.href = '/';
+        });
+
+        // Load prompt on page load
+        loadPrompt();
+    </script>
+</body>
+</html>
