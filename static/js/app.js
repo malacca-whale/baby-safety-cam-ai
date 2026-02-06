@@ -1,37 +1,93 @@
+// Baby Safety Cam AI - Frontend JavaScript
 // --- SocketIO connection ---
 const socket = io();
 
-socket.on('connect', () => console.log('SocketIO connected'));
-socket.on('disconnect', () => console.log('SocketIO disconnected'));
+socket.on('connect', () => {
+    console.log('SocketIO connected');
+    updateConnectionStatus(true);
+});
+socket.on('disconnect', () => {
+    console.log('SocketIO disconnected');
+    updateConnectionStatus(false);
+});
 
-// --- DOM refs ---
-const videoFeed = document.getElementById('videoFeed');
-const videoOverlay = document.getElementById('videoOverlay');
-const connectionStatus = document.getElementById('connectionStatus');
-const riskBadge = document.getElementById('riskBadge');
-const babyPosition = document.getElementById('babyPosition');
-const babyInCrib = document.getElementById('babyInCrib');
-const babyFace = document.getElementById('babyFace');
-const babyDesc = document.getElementById('babyDesc');
-const motionStatus = document.getElementById('motionStatus');
-const motionMagnitude = document.getElementById('motionMagnitude');
-const motionDesc = document.getElementById('motionDesc');
-const audioCrying = document.getElementById('audioCrying');
-const audioBreathing = document.getElementById('audioBreathing');
-const audioRms = document.getElementById('audioRms');
-const audioDesc = document.getElementById('audioDesc');
-const audioLevelFill = document.getElementById('audioLevelFill');
+function updateConnectionStatus(connected) {
+    const el = document.getElementById('connectionStatus');
+    const textEl = el?.querySelector('.status-text');
+    if (connected) {
+        el?.classList.remove('disconnected');
+        if (textEl) textEl.textContent = '연결됨';
+    } else {
+        el?.classList.add('disconnected');
+        if (textEl) textEl.textContent = '연결 끊김';
+    }
+}
+
+// --- Korean timezone (KST, UTC+9) formatting ---
+function toKST(ts) {
+    if (!ts) return null;
+    const d = new Date(ts);
+    return new Date(d.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
+}
+
+function fmtTime(ts) {
+    if (!ts) return '--';
+    const d = toKST(ts);
+    if (!d) return '--';
+    return d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+}
+
+function fmtDateTime(ts) {
+    if (!ts) return '--';
+    const d = toKST(ts);
+    if (!d) return '--';
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const mins = String(d.getMinutes()).padStart(2, '0');
+    const secs = String(d.getSeconds()).padStart(2, '0');
+    return `${month}/${day} ${hours}:${mins}:${secs}`;
+}
+
+function fmtClockTime() {
+    const d = toKST(new Date().toISOString());
+    if (!d) return '--:--:--';
+    const hours = String(d.getHours()).padStart(2, '0');
+    const mins = String(d.getMinutes()).padStart(2, '0');
+    const secs = String(d.getSeconds()).padStart(2, '0');
+    return `${hours}:${mins}:${secs}`;
+}
+
+// --- Real-time clock ---
+function updateClock() {
+    const clockEl = document.getElementById('clock');
+    if (clockEl) {
+        clockEl.textContent = fmtClockTime();
+    }
+}
+setInterval(updateClock, 1000);
+updateClock();
 
 // --- Video feed ---
+const videoFeed = document.getElementById('videoFeed');
+const videoOverlay = document.getElementById('videoOverlay');
+
 setTimeout(() => {
-    if (videoFeed.naturalWidth > 0) videoOverlay.classList.remove('visible');
+    if (videoFeed && videoFeed.naturalWidth > 0) {
+        videoOverlay?.classList.remove('visible');
+    }
 }, 2000);
-videoFeed.onload = () => videoOverlay.classList.remove('visible');
-videoFeed.onerror = () => {
-    videoOverlay.classList.add('visible');
-    videoOverlay.innerHTML = '<span>카메라 연결 끊김</span>';
-    connectionStatus.classList.add('disconnected');
-};
+
+if (videoFeed) {
+    videoFeed.onload = () => videoOverlay?.classList.remove('visible');
+    videoFeed.onerror = () => {
+        if (videoOverlay) {
+            videoOverlay.classList.add('visible');
+            videoOverlay.innerHTML = '<span>카메라 연결 끊김</span>';
+        }
+        updateConnectionStatus(false);
+    };
+}
 
 // --- Audio playback via WebSocket ---
 let audioCtx = null;
@@ -39,22 +95,24 @@ let audioEnabled = false;
 let nextPlayTime = 0;
 const AUDIO_SR = 16000;
 
-document.getElementById('audioToggleBtn').addEventListener('click', () => {
-    const icon = document.getElementById('audioIcon');
-    const btn = document.getElementById('audioToggleBtn');
-    if (audioEnabled) {
-        audioEnabled = false;
-        if (audioCtx) { audioCtx.close(); audioCtx = null; }
-        icon.innerHTML = '&#128266;';
-        btn.classList.remove('active');
-    } else {
-        audioCtx = new AudioContext({ sampleRate: AUDIO_SR });
-        audioEnabled = true;
-        nextPlayTime = audioCtx.currentTime;
-        icon.innerHTML = '&#128264;';
-        btn.classList.add('active');
-    }
-});
+const audioToggleBtn = document.getElementById('audioToggleBtn');
+if (audioToggleBtn) {
+    audioToggleBtn.addEventListener('click', () => {
+        const icon = document.getElementById('audioIcon');
+        if (audioEnabled) {
+            audioEnabled = false;
+            if (audioCtx) { audioCtx.close(); audioCtx = null; }
+            if (icon) icon.innerHTML = '&#128266;';
+            audioToggleBtn.classList.remove('active');
+        } else {
+            audioCtx = new AudioContext({ sampleRate: AUDIO_SR });
+            audioEnabled = true;
+            nextPlayTime = audioCtx.currentTime;
+            if (icon) icon.innerHTML = '&#128264;';
+            audioToggleBtn.classList.add('active');
+        }
+    });
+}
 
 socket.on('audio_data', (data) => {
     if (!audioEnabled || !audioCtx) return;
@@ -78,43 +136,57 @@ socket.on('audio_data', (data) => {
 });
 
 // --- Controls ---
-document.getElementById('cameraSelect').addEventListener('change', async (e) => {
-    const cameraId = parseInt(e.target.value);
-    try {
-        const resp = await fetch('/api/switch_camera', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ camera_id: cameraId }),
-        });
-        const data = await resp.json();
-        if (data.success) videoFeed.src = '/video_feed?' + Date.now();
-    } catch (err) { console.error('Camera switch failed:', err); }
-});
+const cameraSelect = document.getElementById('cameraSelect');
+if (cameraSelect) {
+    cameraSelect.addEventListener('change', async (e) => {
+        const cameraId = parseInt(e.target.value);
+        try {
+            const resp = await fetch('/api/switch_camera', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ camera_id: cameraId }),
+            });
+            const data = await resp.json();
+            if (data.success && videoFeed) videoFeed.src = '/video_feed?' + Date.now();
+        } catch (err) { console.error('Camera switch failed:', err); }
+    });
+}
 
-document.getElementById('micSelect').addEventListener('change', async (e) => {
-    const micId = parseInt(e.target.value);
-    try {
-        await fetch('/api/switch_microphone', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ microphone_id: micId }),
-        });
-    } catch (err) { console.error('Mic switch failed:', err); }
-});
+const micSelect = document.getElementById('micSelect');
+if (micSelect) {
+    micSelect.addEventListener('change', async (e) => {
+        const micId = parseInt(e.target.value);
+        try {
+            await fetch('/api/switch_microphone', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ microphone_id: micId }),
+            });
+        } catch (err) { console.error('Mic switch failed:', err); }
+    });
+}
 
-document.getElementById('testAlertBtn').addEventListener('click', async () => {
-    const btn = document.getElementById('testAlertBtn');
-    btn.disabled = true; btn.textContent = '전송 중...';
-    try { await fetch('/api/test_alert', { method: 'POST' }); } catch (err) {}
-    btn.disabled = false; btn.textContent = '테스트 알림';
-});
+const testAlertBtn = document.getElementById('testAlertBtn');
+if (testAlertBtn) {
+    testAlertBtn.addEventListener('click', async () => {
+        testAlertBtn.disabled = true;
+        testAlertBtn.innerHTML = '<span>&#128276;</span> 전송 중...';
+        try { await fetch('/api/test_alert', { method: 'POST' }); } catch (err) {}
+        testAlertBtn.disabled = false;
+        testAlertBtn.innerHTML = '<span>&#128276;</span> 테스트 알림';
+    });
+}
 
-document.getElementById('forceReportBtn').addEventListener('click', async () => {
-    const btn = document.getElementById('forceReportBtn');
-    btn.disabled = true; btn.textContent = '전송 중...';
-    try { await fetch('/api/force_report', { method: 'POST' }); } catch (err) {}
-    btn.disabled = false; btn.textContent = '상태 보고';
-});
+const forceReportBtn = document.getElementById('forceReportBtn');
+if (forceReportBtn) {
+    forceReportBtn.addEventListener('click', async () => {
+        forceReportBtn.disabled = true;
+        forceReportBtn.innerHTML = '<span>&#128172;</span> 전송 중...';
+        try { await fetch('/api/force_report', { method: 'POST' }); } catch (err) {}
+        forceReportBtn.disabled = false;
+        forceReportBtn.innerHTML = '<span>&#128172;</span> 상태 보고';
+    });
+}
 
 // --- Status polling ---
 async function updateStatus() {
@@ -125,41 +197,87 @@ async function updateStatus() {
         const baby = data.baby || {};
         const risk = baby.risk_level || 'safe';
         const riskKr = { safe: '안전', warning: '주의', danger: '위험' };
-        riskBadge.textContent = riskKr[risk] || risk.toUpperCase();
-        riskBadge.className = 'risk-badge ' + risk;
-        const posKr = { supine: '등(안전)', prone: '엎드림(위험)', side: '옆으로', sitting: '앉음', unknown: '알 수 없음' };
-        babyPosition.textContent = `자세: ${posKr[baby.position] || baby.position || '--'}`;
-        babyInCrib.textContent = `침대 안: ${baby.in_crib !== undefined ? (baby.in_crib ? '예' : '아니오') : '--'}`;
-        babyFace.textContent = `얼굴 가려짐: ${baby.face_covered !== undefined ? (baby.face_covered ? '예!' : '아니오') : '--'}`;
+
+        // Risk badge
+        const riskBadge = document.getElementById('riskBadge');
+        if (riskBadge) {
+            riskBadge.textContent = riskKr[risk] || risk.toUpperCase();
+            riskBadge.className = 'risk-badge ' + risk;
+        }
+
+        // HUD risk indicator
+        const hudRisk = document.getElementById('hudRisk');
+        if (hudRisk) {
+            const dot = hudRisk.querySelector('.risk-dot');
+            const val = hudRisk.querySelector('.hud-value');
+            if (dot) dot.className = 'risk-dot ' + risk;
+            if (val) val.textContent = riskKr[risk] || risk;
+        }
+
+        // Baby status
+        const posKr = { supine: '바로 누움', prone: '엎드림!', side: '옆으로', sitting: '앉음', unknown: '알 수 없음' };
+        const babyPosition = document.getElementById('babyPosition');
+        const babyInCrib = document.getElementById('babyInCrib');
+        const babyFace = document.getElementById('babyFace');
+        const babyDesc = document.getElementById('babyDesc');
+
+        if (babyPosition) babyPosition.textContent = posKr[baby.position] || baby.position || '--';
+        if (babyInCrib) babyInCrib.textContent = baby.in_crib !== undefined ? (baby.in_crib ? '예' : '아니오') : '--';
+        if (babyFace) babyFace.textContent = baby.face_covered !== undefined ? (baby.face_covered ? '예!' : '아니오') : '--';
+
         const extras = [];
         if (baby.blanket_near_face) extras.push('이불이 얼굴 근처');
         if (baby.loose_objects) extras.push('위험 물체 있음');
         if (baby.eyes_open) extras.push('눈 뜸');
         if (!baby.baby_visible) extras.push('아기 안 보임');
-        const extrasText = extras.length ? ` | ${extras.join(', ')}` : '';
-        babyDesc.textContent = (baby.description || '--') + extrasText;
+        const extrasText = extras.length ? ` (${extras.join(', ')})` : '';
+        if (babyDesc) babyDesc.textContent = (baby.description || 'AI 분석 대기 중...') + extrasText;
 
+        // Baby card styling
         const babyCard = document.getElementById('babyCard');
-        babyCard.className = 'status-card' + (risk === 'danger' ? ' card-danger' : risk === 'warning' ? ' card-warning' : '');
+        if (babyCard) {
+            babyCard.className = 'status-card baby-card' +
+                (risk === 'danger' ? ' card-danger' : risk === 'warning' ? ' card-warning' : '');
+        }
 
+        // Motion status
         const motion = data.motion || {};
-        motionStatus.textContent = `움직임: ${motion.has_motion ? '있음' : '없음'}`;
-        motionMagnitude.textContent = `강도: ${motion.motion_magnitude ?? '--'}`;
-        motionDesc.textContent = motion.description || '--';
+        const motionStatus = document.getElementById('motionStatus');
+        const motionMagnitude = document.getElementById('motionMagnitude');
+        const motionDesc = document.getElementById('motionDesc');
 
+        if (motionStatus) motionStatus.textContent = motion.has_motion ? '감지됨' : '없음';
+        if (motionMagnitude) motionMagnitude.textContent = motion.motion_magnitude?.toFixed(2) ?? '--';
+        if (motionDesc) motionDesc.textContent = motion.description || '움직임 분석 중...';
+
+        // Audio status
         const audio = data.audio || {};
-        audioCrying.textContent = `울음: ${audio.is_crying ? '감지됨!' : '없음'}`;
-        const brate = audio.breathing_rate ? ` (~${audio.breathing_rate} bpm)` : '';
-        audioBreathing.textContent = `호흡: ${audio.breathing_detected ? '감지됨' + brate : '감지 안됨'}`;
-        audioRms.textContent = `레벨: ${audio.rms_level ?? '--'} | 스펙트럼: ${audio.spectral_centroid ?? '--'}Hz`;
-        audioDesc.textContent = audio.description || '--';
+        const audioCrying = document.getElementById('audioCrying');
+        const audioBreathing = document.getElementById('audioBreathing');
+        const audioRms = document.getElementById('audioRms');
+        const audioDesc = document.getElementById('audioDesc');
+
+        if (audioCrying) audioCrying.textContent = audio.is_crying ? '감지됨!' : '없음';
+        const brate = audio.breathing_rate ? ` (~${audio.breathing_rate.toFixed(0)} bpm)` : '';
+        if (audioBreathing) audioBreathing.textContent = audio.breathing_detected ? '감지됨' + brate : '감지 안됨';
+        if (audioRms) audioRms.textContent = `${audio.rms_level?.toFixed(3) ?? '--'}`;
+        if (audioDesc) audioDesc.textContent = audio.description || '오디오 분석 중...';
 
         // Audio level meter
-        const rmsNorm = Math.min((audio.rms_level || 0) / 0.3, 1.0);
-        audioLevelFill.style.width = (rmsNorm * 100) + '%';
-        audioLevelFill.style.background = audio.is_crying ? '#ef4444' : rmsNorm > 0.5 ? '#f59e0b' : '#22c55e';
+        const audioLevelFill = document.getElementById('audioLevelFill');
+        if (audioLevelFill) {
+            const rmsNorm = Math.min((audio.rms_level || 0) / 0.3, 1.0);
+            audioLevelFill.style.width = (rmsNorm * 100) + '%';
+            if (audio.is_crying) {
+                audioLevelFill.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+            } else if (rmsNorm > 0.5) {
+                audioLevelFill.style.background = 'linear-gradient(90deg, #f59e0b, #d97706)';
+            } else {
+                audioLevelFill.style.background = 'linear-gradient(90deg, #22c55e, #16a34a)';
+            }
+        }
 
-        // Update last update timestamps (KST)
+        // Update timestamps (KST)
         const lastVisionEl = document.getElementById('lastVisionUpdate');
         const lastMotionEl = document.getElementById('lastMotionUpdate');
         const lastAudioEl = document.getElementById('lastAudioUpdate');
@@ -167,16 +285,16 @@ async function updateStatus() {
         if (lastMotionEl) lastMotionEl.textContent = fmtDateTime(data.last_motion_update);
         if (lastAudioEl) lastAudioEl.textContent = fmtDateTime(data.last_audio_update);
 
-        // Update video timestamp
+        // Update video timestamp HUD
         const videoTs = document.getElementById('videoTimestamp');
         if (videoTs) {
-            const now = new Date();
-            videoTs.textContent = '영상 스트리밍: ' + fmtDateTime(now.toISOString());
+            const hudVal = videoTs.querySelector('.hud-value');
+            if (hudVal) hudVal.textContent = fmtDateTime(new Date().toISOString());
         }
 
-        connectionStatus.classList.remove('disconnected');
+        updateConnectionStatus(true);
     } catch (err) {
-        connectionStatus.classList.add('disconnected');
+        updateConnectionStatus(false);
     }
 }
 
@@ -186,67 +304,31 @@ document.querySelectorAll('.tab').forEach(tab => {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         tab.classList.add('active');
-        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+        document.getElementById('tab-' + tab.dataset.tab)?.classList.add('active');
     });
 });
 
-// --- Korean timezone (KST, UTC+9) formatting ---
-function toKST(ts) {
-    if (!ts) return null;
-    const d = new Date(ts);
-    // Force KST timezone
-    return new Date(d.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
-}
-
-function fmtTime(ts) {
-    if (!ts) return '';
-    const d = toKST(ts);
-    if (!d) return '';
-    return d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-}
-
-function fmtDateTime(ts) {
-    if (!ts) return '--';
-    const d = toKST(ts);
-    if (!d) return '--';
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const hours = String(d.getHours()).padStart(2, '0');
-    const mins = String(d.getMinutes()).padStart(2, '0');
-    const secs = String(d.getSeconds()).padStart(2, '0');
-    return `${month}/${day} ${hours}:${mins}:${secs}`;
-}
-
-function fmtFullDateTime(ts) {
-    if (!ts) return '--';
-    const d = toKST(ts);
-    if (!d) return '--';
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const hours = String(d.getHours()).padStart(2, '0');
-    const mins = String(d.getMinutes()).padStart(2, '0');
-    const secs = String(d.getSeconds()).padStart(2, '0');
-    return `${year}년 ${month}월 ${day}일 ${hours}:${mins}:${secs} (KST)`;
-}
-
 function riskDot(level) {
     const colors = { danger: '#ef4444', warning: '#f59e0b', safe: '#22c55e' };
-    return `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${colors[level]||'#71717a'};margin-right:4px"></span>`;
+    return `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${colors[level]||'#64748b'};margin-right:6px"></span>`;
 }
 
 async function updateDiscordLog() {
     try {
         const rows = await (await fetch('/api/history/discord?limit=30')).json();
         const el = document.getElementById('discordLog');
-        if (!rows.length) { el.innerHTML = '<div class="log-empty">디스코드 메시지가 아직 없습니다</div>'; return; }
+        if (!el) return;
+        if (!rows.length) {
+            el.innerHTML = '<div class="log-empty">Discord 메시지가 아직 없습니다</div>';
+            return;
+        }
         el.innerHTML = rows.map(r => `
             <div class="log-item ${r.success ? '' : 'log-error'}">
                 <span class="log-time">${fmtTime(r.timestamp)}</span>
                 <span class="log-channel">${r.channel}</span>
                 ${riskDot(r.risk_level)}
                 <span class="log-title">${r.title || ''}</span>
-                <span class="log-desc">${(r.description || '').substring(0, 80)}</span>
+                <span class="log-desc">${(r.description || '').substring(0, 60)}</span>
                 ${r.has_image ? '<span class="log-badge">IMG</span>' : ''}
                 ${!r.success ? '<span class="log-badge log-badge-err">FAIL</span>' : ''}
             </div>`).join('');
@@ -257,15 +339,19 @@ async function updateVisionLog() {
     try {
         const rows = await (await fetch('/api/history/vision?limit=30')).json();
         const el = document.getElementById('visionLog');
-        if (!rows.length) { el.innerHTML = '<div class="log-empty">영상 분석 데이터가 아직 없습니다</div>'; return; }
-        const posKr = { supine: '등', prone: '엎드림', side: '옆으로', sitting: '앉음', unknown: '알 수 없음' };
+        if (!el) return;
+        if (!rows.length) {
+            el.innerHTML = '<div class="log-empty">AI 분석 데이터가 아직 없습니다</div>';
+            return;
+        }
+        const posKr = { supine: '등', prone: '엎드림', side: '옆으로', sitting: '앉음', unknown: '?' };
         el.innerHTML = rows.map(r => `
             <div class="log-item">
                 <span class="log-time">${fmtTime(r.timestamp)}</span>
                 ${riskDot(r.risk_level)}
                 <span class="log-badge">${posKr[r.position] || r.position}</span>
                 <span class="log-desc">${r.description || ''}</span>
-                ${r.face_covered ? '<span class="log-badge log-badge-err">얼굴 가려짐</span>' : ''}
+                ${r.face_covered ? '<span class="log-badge log-badge-err">얼굴</span>' : ''}
                 ${!r.in_crib ? '<span class="log-badge log-badge-err">침대 밖</span>' : ''}
             </div>`).join('');
     } catch (e) {}
@@ -275,10 +361,14 @@ async function updateEventsLog() {
     try {
         const rows = await (await fetch('/api/history/events?limit=30')).json();
         const el = document.getElementById('eventsLog');
-        if (!rows.length) { el.innerHTML = '<div class="log-empty">이벤트가 아직 없습니다</div>'; return; }
+        if (!el) return;
+        if (!rows.length) {
+            el.innerHTML = '<div class="log-empty">이벤트가 아직 없습니다</div>';
+            return;
+        }
         el.innerHTML = rows.map(r => {
             let desc = '';
-            try { desc = r.data ? JSON.stringify(JSON.parse(r.data)).substring(0, 80) : ''; } catch(e) {}
+            try { desc = r.data ? JSON.stringify(JSON.parse(r.data)).substring(0, 60) : ''; } catch(e) {}
             return `<div class="log-item">
                 <span class="log-time">${fmtTime(r.timestamp)}</span>
                 <span class="log-badge">${r.event_type}</span>
@@ -292,12 +382,16 @@ async function updateEventsLog() {
 async function updateStats() {
     try {
         const s = await (await fetch('/api/stats')).json();
-        document.getElementById('statVision').textContent = s.vision_logs || 0;
-        document.getElementById('statMotion').textContent = s.motion_logs || 0;
-        document.getElementById('statAudio').textContent = s.audio_logs || 0;
-        document.getElementById('statDiscord').textContent = s.discord_messages || 0;
-        document.getElementById('statAlerts').textContent = s.alerts_count || 0;
-        document.getElementById('statCries').textContent = s.cry_count || 0;
+        const setVal = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = val || 0;
+        };
+        setVal('statVision', s.vision_logs);
+        setVal('statMotion', s.motion_logs);
+        setVal('statAudio', s.audio_logs);
+        setVal('statDiscord', s.discord_messages);
+        setVal('statAlerts', s.alerts_count);
+        setVal('statCries', s.cry_count);
     } catch (e) {}
 }
 
@@ -308,6 +402,7 @@ function updateAllLogs() {
     updateStats();
 }
 
+// Start polling
 setInterval(updateStatus, 3000);
 setInterval(updateAllLogs, 5000);
 updateStatus();
@@ -319,20 +414,20 @@ const settingsToggleBtn = document.getElementById('settingsToggleBtn');
 const vlmPromptTextarea = document.getElementById('vlmPromptTextarea');
 const aiCameraSelect = document.getElementById('aiCameraSelect');
 
-// Toggle settings visibility
-settingsToggleBtn.addEventListener('click', () => {
-    const isHidden = settingsSection.style.display === 'none';
-    settingsSection.style.display = isHidden ? 'block' : 'none';
-    settingsToggleBtn.textContent = isHidden ? '설정 닫기' : '설정';
-    if (isHidden) loadSettings();
-});
+if (settingsToggleBtn) {
+    settingsToggleBtn.addEventListener('click', () => {
+        const isHidden = settingsSection?.style.display === 'none';
+        if (settingsSection) settingsSection.style.display = isHidden ? 'block' : 'none';
+        settingsToggleBtn.innerHTML = isHidden ? '<span>&#9881;</span> 설정 닫기' : '<span>&#9881;</span> 설정';
+        if (isHidden) loadSettings();
+    });
+}
 
-// Load settings from server
 async function loadSettings() {
     try {
         const config = await (await fetch('/api/config')).json();
-        vlmPromptTextarea.value = config.vlm_prompt || '';
-        if (config.ai_camera_id !== undefined) {
+        if (vlmPromptTextarea) vlmPromptTextarea.value = config.vlm_prompt || '';
+        if (aiCameraSelect && config.ai_camera_id !== undefined) {
             aiCameraSelect.value = config.ai_camera_id;
         }
     } catch (e) {
@@ -340,78 +435,72 @@ async function loadSettings() {
     }
 }
 
-// Save VLM prompt
-document.getElementById('savePromptBtn').addEventListener('click', async () => {
-    const btn = document.getElementById('savePromptBtn');
-    const prompt = vlmPromptTextarea.value.trim();
-    if (!prompt) {
-        alert('프롬프트를 입력해주세요.');
-        return;
-    }
-    btn.disabled = true;
-    btn.textContent = '저장 중...';
-    try {
-        const resp = await fetch('/api/config/vlm_prompt', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ value: prompt }),
-        });
-        if (resp.ok) {
-            alert('프롬프트가 저장되었습니다. 다음 분석부터 적용됩니다.');
-        } else {
-            alert('저장 실패');
+const savePromptBtn = document.getElementById('savePromptBtn');
+if (savePromptBtn) {
+    savePromptBtn.addEventListener('click', async () => {
+        const prompt = vlmPromptTextarea?.value.trim();
+        if (!prompt) {
+            alert('프롬프트를 입력해주세요.');
+            return;
         }
-    } catch (e) {
-        alert('저장 실패: ' + e);
-    }
-    btn.disabled = false;
-    btn.textContent = '프롬프트 저장';
-});
-
-// Reset VLM prompt to default
-document.getElementById('resetPromptBtn').addEventListener('click', async () => {
-    const btn = document.getElementById('resetPromptBtn');
-    btn.disabled = true;
-    btn.textContent = '복원 중...';
-    try {
-        const defaultResp = await fetch('/api/config/vlm_prompt/default');
-        const defaultData = await defaultResp.json();
-        vlmPromptTextarea.value = defaultData.value;
-
-        await fetch('/api/config/vlm_prompt', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ value: defaultData.value }),
-        });
-        alert('기본 프롬프트로 복원되었습니다.');
-    } catch (e) {
-        alert('복원 실패: ' + e);
-    }
-    btn.disabled = false;
-    btn.textContent = '기본값 복원';
-});
-
-// Save AI camera selection
-document.getElementById('saveAiCameraBtn').addEventListener('click', async () => {
-    const btn = document.getElementById('saveAiCameraBtn');
-    const cameraId = parseInt(aiCameraSelect.value);
-    btn.disabled = true;
-    btn.textContent = '저장 중...';
-    try {
-        const resp = await fetch('/api/switch_ai_camera', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ camera_id: cameraId }),
-        });
-        const data = await resp.json();
-        if (data.success) {
-            alert(`AI 카메라가 Camera ${cameraId}로 설정되었습니다.`);
-        } else {
-            alert('AI 카메라 설정 실패');
+        savePromptBtn.disabled = true;
+        savePromptBtn.textContent = '저장 중...';
+        try {
+            const resp = await fetch('/api/config/vlm_prompt', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ value: prompt }),
+            });
+            alert(resp.ok ? '저장되었습니다.' : '저장 실패');
+        } catch (e) {
+            alert('저장 실패: ' + e);
         }
-    } catch (e) {
-        alert('설정 실패: ' + e);
-    }
-    btn.disabled = false;
-    btn.textContent = '저장';
-});
+        savePromptBtn.disabled = false;
+        savePromptBtn.textContent = '저장';
+    });
+}
+
+const resetPromptBtn = document.getElementById('resetPromptBtn');
+if (resetPromptBtn) {
+    resetPromptBtn.addEventListener('click', async () => {
+        resetPromptBtn.disabled = true;
+        resetPromptBtn.textContent = '복원 중...';
+        try {
+            const defaultResp = await fetch('/api/config/vlm_prompt/default');
+            const defaultData = await defaultResp.json();
+            if (vlmPromptTextarea) vlmPromptTextarea.value = defaultData.value;
+            await fetch('/api/config/vlm_prompt', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ value: defaultData.value }),
+            });
+            alert('기본값으로 복원되었습니다.');
+        } catch (e) {
+            alert('복원 실패: ' + e);
+        }
+        resetPromptBtn.disabled = false;
+        resetPromptBtn.textContent = '기본값';
+    });
+}
+
+const saveAiCameraBtn = document.getElementById('saveAiCameraBtn');
+if (saveAiCameraBtn) {
+    saveAiCameraBtn.addEventListener('click', async () => {
+        const cameraId = parseInt(aiCameraSelect?.value);
+        saveAiCameraBtn.disabled = true;
+        saveAiCameraBtn.textContent = '저장 중...';
+        try {
+            const resp = await fetch('/api/switch_ai_camera', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ camera_id: cameraId }),
+            });
+            const data = await resp.json();
+            alert(data.success ? 'AI 카메라가 설정되었습니다.' : 'AI 카메라 설정 실패');
+        } catch (e) {
+            alert('설정 실패: ' + e);
+        }
+        saveAiCameraBtn.disabled = false;
+        saveAiCameraBtn.textContent = '저장';
+    });
+}

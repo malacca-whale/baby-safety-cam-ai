@@ -3,170 +3,287 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>아기 모니터</title>
+    <title>Baby Safety Cam AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>아기 모니터</h1>
-            <div class="status-indicator" id="connectionStatus">
-                <span class="dot"></span> 연결됨
+    <div class="app">
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <span class="logo-icon">&#128118;</span>
+                    <span class="logo-text">Baby Safety Cam</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="clock" id="clock">--:--:--</div>
+                <div class="status-indicator" id="connectionStatus">
+                    <span class="pulse-dot"></span>
+                    <span class="status-text">연결됨</span>
+                </div>
             </div>
         </header>
 
-        <main>
-            <section class="video-section">
-                <div class="video-wrapper">
-                    <img id="videoFeed" src="/video_feed" alt="아기 카메라 피드">
-                    <div class="video-overlay" id="videoOverlay">
-                        <span>카메라 로딩 중...</span>
+        <main class="main-content">
+            <div class="grid-layout">
+                <!-- Video Panel -->
+                <section class="video-panel">
+                    <div class="panel-header">
+                        <h2><span class="icon">&#128247;</span> 실시간 영상</h2>
+                        <div class="panel-actions">
+                            <button id="audioToggleBtn" class="icon-btn" title="오디오 듣기">
+                                <span id="audioIcon">&#128266;</span>
+                            </button>
+                        </div>
                     </div>
-                    <!-- Audio listen button overlay -->
-                    <button id="audioToggleBtn" class="audio-toggle" title="오디오 듣기">
-                        <span id="audioIcon">&#128266;</span>
-                    </button>
-                    <div class="audio-level-bar">
-                        <div class="audio-level-fill" id="audioLevelFill"></div>
+                    <div class="video-container">
+                        <img id="videoFeed" src="/video_feed" alt="아기 카메라 피드">
+                        <div class="video-overlay" id="videoOverlay">
+                            <div class="loading-spinner"></div>
+                            <span>카메라 연결 중...</span>
+                        </div>
+                        <div class="video-hud">
+                            <div class="hud-item hud-timestamp" id="videoTimestamp">
+                                <span class="hud-icon">&#128337;</span>
+                                <span class="hud-value">스트리밍 중</span>
+                            </div>
+                            <div class="hud-item hud-risk" id="hudRisk">
+                                <span class="risk-dot safe"></span>
+                                <span class="hud-value">안전</span>
+                            </div>
+                        </div>
+                        <div class="audio-meter">
+                            <div class="audio-meter-fill" id="audioLevelFill"></div>
+                        </div>
                     </div>
-                    <!-- Timestamp overlay -->
-                    <div class="video-timestamp" id="videoTimestamp">
-                        영상 스트리밍 중
+                    <div class="update-bar">
+                        <div class="update-item">
+                            <span class="update-label">&#129302; AI 분석</span>
+                            <span class="update-value" id="lastVisionUpdate">--</span>
+                        </div>
+                        <div class="update-item">
+                            <span class="update-label">&#127939; 움직임</span>
+                            <span class="update-value" id="lastMotionUpdate">--</span>
+                        </div>
+                        <div class="update-item">
+                            <span class="update-label">&#127908; 오디오</span>
+                            <span class="update-value" id="lastAudioUpdate">--</span>
+                        </div>
                     </div>
-                </div>
-                <div class="last-update-info">
-                    <span>AI 분석: <b id="lastVisionUpdate">--</b></span>
-                    <span>움직임: <b id="lastMotionUpdate">--</b></span>
-                    <span>오디오: <b id="lastAudioUpdate">--</b></span>
-                </div>
-            </section>
+                </section>
 
-            <section class="controls-section">
+                <!-- Status Panel -->
+                <section class="status-panel">
+                    <div class="panel-header">
+                        <h2><span class="icon">&#128200;</span> 실시간 상태</h2>
+                    </div>
+
+                    <!-- Baby Status Card -->
+                    <div class="status-card baby-card" id="babyCard">
+                        <div class="card-header">
+                            <span class="card-icon">&#128118;</span>
+                            <span class="card-title">아기 상태</span>
+                            <div class="risk-badge" id="riskBadge">안전</div>
+                        </div>
+                        <div class="card-content">
+                            <div class="status-row">
+                                <span class="status-label">자세</span>
+                                <span class="status-value" id="babyPosition">--</span>
+                            </div>
+                            <div class="status-row">
+                                <span class="status-label">침대 안</span>
+                                <span class="status-value" id="babyInCrib">--</span>
+                            </div>
+                            <div class="status-row">
+                                <span class="status-label">얼굴 가려짐</span>
+                                <span class="status-value" id="babyFace">--</span>
+                            </div>
+                            <div class="status-desc" id="babyDesc">AI 분석 대기 중...</div>
+                        </div>
+                    </div>
+
+                    <!-- Motion Status Card -->
+                    <div class="status-card motion-card" id="motionCard">
+                        <div class="card-header">
+                            <span class="card-icon">&#127939;</span>
+                            <span class="card-title">움직임</span>
+                        </div>
+                        <div class="card-content">
+                            <div class="status-row">
+                                <span class="status-label">감지</span>
+                                <span class="status-value" id="motionStatus">--</span>
+                            </div>
+                            <div class="status-row">
+                                <span class="status-label">강도</span>
+                                <span class="status-value" id="motionMagnitude">--</span>
+                            </div>
+                            <div class="status-desc" id="motionDesc">움직임 분석 중...</div>
+                        </div>
+                    </div>
+
+                    <!-- Audio Status Card -->
+                    <div class="status-card audio-card" id="audioCard">
+                        <div class="card-header">
+                            <span class="card-icon">&#127908;</span>
+                            <span class="card-title">오디오</span>
+                        </div>
+                        <div class="card-content">
+                            <div class="status-row">
+                                <span class="status-label">울음</span>
+                                <span class="status-value" id="audioCrying">--</span>
+                            </div>
+                            <div class="status-row">
+                                <span class="status-label">호흡</span>
+                                <span class="status-value" id="audioBreathing">--</span>
+                            </div>
+                            <div class="status-row">
+                                <span class="status-label">레벨</span>
+                                <span class="status-value" id="audioRms">--</span>
+                            </div>
+                            <div class="status-desc" id="audioDesc">오디오 분석 중...</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Controls Section -->
+            <section class="controls-panel">
                 <div class="control-group">
-                    <label for="cameraSelect">카메라</label>
+                    <label for="cameraSelect">&#128247; 카메라</label>
                     <select id="cameraSelect">
                         {% for cam in cameras %}
                         <option value="{{ cam.id }}">{{ cam.name }} ({{ cam.resolution }})</option>
                         {% endfor %}
                         {% if not cameras %}
-                        <option value="0">카메라를 찾을 수 없음</option>
+                        <option value="0">카메라 없음</option>
                         {% endif %}
                     </select>
                 </div>
-
                 <div class="control-group">
-                    <label for="micSelect">마이크</label>
+                    <label for="micSelect">&#127908; 마이크</label>
                     <select id="micSelect">
                         {% for mic in microphones %}
                         <option value="{{ mic.id }}">{{ mic.name }}</option>
                         {% endfor %}
                         {% if not microphones %}
-                        <option value="0">마이크를 찾을 수 없음</option>
+                        <option value="0">마이크 없음</option>
                         {% endif %}
                     </select>
                 </div>
-
                 <div class="button-group">
-                    <button id="testAlertBtn" class="btn btn-warning">테스트 알림</button>
-                    <button id="forceReportBtn" class="btn btn-info">상태 보고</button>
-                    <button id="settingsToggleBtn" class="btn btn-secondary">설정</button>
+                    <button id="testAlertBtn" class="btn btn-warning">
+                        <span>&#128276;</span> 테스트 알림
+                    </button>
+                    <button id="forceReportBtn" class="btn btn-info">
+                        <span>&#128172;</span> 상태 보고
+                    </button>
+                    <button id="settingsToggleBtn" class="btn btn-secondary">
+                        <span>&#9881;</span> 설정
+                    </button>
                 </div>
             </section>
 
             <!-- Settings Section -->
-            <section class="settings-section" id="settingsSection" style="display: none;">
-                <h2>설정</h2>
-
-                <div class="settings-group">
-                    <label for="aiCameraSelect">AI 분석 카메라</label>
-                    <div class="settings-row">
-                        <select id="aiCameraSelect">
-                            {% for cam in cameras %}
-                            <option value="{{ cam.id }}">{{ cam.name }} ({{ cam.resolution }})</option>
-                            {% endfor %}
-                            {% if not cameras %}
-                            <option value="0">카메라를 찾을 수 없음</option>
-                            {% endif %}
-                        </select>
-                        <button id="saveAiCameraBtn" class="btn btn-primary">저장</button>
-                    </div>
-                    <p class="settings-help">이 카메라로 AI 영상 분석 및 Discord 이미지 전송을 수행합니다.</p>
+            <section class="settings-panel" id="settingsSection" style="display: none;">
+                <div class="panel-header">
+                    <h2><span class="icon">&#9881;</span> 설정</h2>
                 </div>
-
-                <div class="settings-group">
-                    <label for="vlmPromptTextarea">VLM 프롬프트 (Vision AI)</label>
-                    <textarea id="vlmPromptTextarea" rows="12" placeholder="프롬프트 로딩 중..."></textarea>
-                    <div class="settings-row">
-                        <button id="savePromptBtn" class="btn btn-primary">프롬프트 저장</button>
-                        <button id="resetPromptBtn" class="btn btn-secondary">기본값 복원</button>
+                <div class="settings-content">
+                    <div class="settings-group">
+                        <label for="aiCameraSelect">AI 분석 카메라</label>
+                        <div class="settings-row">
+                            <select id="aiCameraSelect">
+                                {% for cam in cameras %}
+                                <option value="{{ cam.id }}">{{ cam.name }} ({{ cam.resolution }})</option>
+                                {% endfor %}
+                                {% if not cameras %}
+                                <option value="0">카메라 없음</option>
+                                {% endif %}
+                            </select>
+                            <button id="saveAiCameraBtn" class="btn btn-primary">저장</button>
+                        </div>
+                        <p class="settings-help">이 카메라로 AI 영상 분석 및 Discord 이미지 전송</p>
                     </div>
-                    <p class="settings-help">Vision AI가 아기 영상을 분석할 때 사용하는 프롬프트입니다.</p>
-                </div>
-            </section>
-
-            <section class="status-section">
-                <h2>실시간 상태</h2>
-                <div class="status-grid">
-                    <div class="status-card" id="babyCard">
-                        <h3>아기</h3>
-                        <div class="risk-badge" id="riskBadge">안전</div>
-                        <p id="babyPosition">자세: --</p>
-                        <p id="babyInCrib">침대 안: --</p>
-                        <p id="babyFace">얼굴 가려짐: --</p>
-                        <p id="babyDesc" class="desc">--</p>
-                    </div>
-
-                    <div class="status-card" id="motionCard">
-                        <h3>움직임</h3>
-                        <p id="motionStatus">움직임: --</p>
-                        <p id="motionMagnitude">강도: --</p>
-                        <p id="motionDesc" class="desc">--</p>
-                    </div>
-
-                    <div class="status-card" id="audioCard">
-                        <h3>오디오</h3>
-                        <p id="audioCrying">울음: --</p>
-                        <p id="audioBreathing">호흡: --</p>
-                        <p id="audioRms">레벨: --</p>
-                        <p id="audioDesc" class="desc">--</p>
+                    <div class="settings-group">
+                        <label for="vlmPromptTextarea">VLM 프롬프트</label>
+                        <textarea id="vlmPromptTextarea" rows="8" placeholder="프롬프트 로딩 중..."></textarea>
+                        <div class="settings-row">
+                            <button id="savePromptBtn" class="btn btn-primary">저장</button>
+                            <button id="resetPromptBtn" class="btn btn-secondary">기본값</button>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Stats -->
-            <section class="stats-section">
-                <h2>통계</h2>
-                <div class="stats-bar" id="statsBar">
-                    <span>영상분석: <b id="statVision">0</b></span>
-                    <span>움직임: <b id="statMotion">0</b></span>
-                    <span>오디오: <b id="statAudio">0</b></span>
-                    <span>디스코드: <b id="statDiscord">0</b></span>
-                    <span>알림: <b id="statAlerts">0</b></span>
-                    <span>울음: <b id="statCries">0</b></span>
+            <!-- Stats Section -->
+            <section class="stats-panel">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-icon">&#129302;</span>
+                        <span class="stat-value" id="statVision">0</span>
+                        <span class="stat-label">AI 분석</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">&#127939;</span>
+                        <span class="stat-value" id="statMotion">0</span>
+                        <span class="stat-label">움직임</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">&#127908;</span>
+                        <span class="stat-value" id="statAudio">0</span>
+                        <span class="stat-label">오디오</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">&#128172;</span>
+                        <span class="stat-value" id="statDiscord">0</span>
+                        <span class="stat-label">Discord</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">&#128276;</span>
+                        <span class="stat-value" id="statAlerts">0</span>
+                        <span class="stat-label">알림</span>
+                    </div>
+                    <div class="stat-item stat-cry">
+                        <span class="stat-icon">&#128557;</span>
+                        <span class="stat-value" id="statCries">0</span>
+                        <span class="stat-label">울음</span>
+                    </div>
                 </div>
             </section>
 
-            <!-- Tabs for History -->
-            <section class="history-section">
+            <!-- History Section -->
+            <section class="history-panel">
                 <div class="tab-bar">
-                    <button class="tab active" data-tab="discord">디스코드 로그</button>
-                    <button class="tab" data-tab="vision">영상 분석</button>
-                    <button class="tab" data-tab="events">이벤트</button>
+                    <button class="tab active" data-tab="discord">
+                        <span>&#128172;</span> Discord 로그
+                    </button>
+                    <button class="tab" data-tab="vision">
+                        <span>&#129302;</span> AI 분석
+                    </button>
+                    <button class="tab" data-tab="events">
+                        <span>&#128196;</span> 이벤트
+                    </button>
                 </div>
-
                 <div class="tab-content active" id="tab-discord">
                     <div class="log-list" id="discordLog"></div>
                 </div>
-
                 <div class="tab-content" id="tab-vision">
                     <div class="log-list" id="visionLog"></div>
                 </div>
-
                 <div class="tab-content" id="tab-events">
                     <div class="log-list" id="eventsLog"></div>
                 </div>
             </section>
         </main>
+
+        <footer class="footer">
+            <span>Baby Safety Cam AI &copy; 2024</span>
+            <span class="footer-sep">|</span>
+            <span>한국 시간 (KST)</span>
+        </footer>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
