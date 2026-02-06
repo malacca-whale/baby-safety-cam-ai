@@ -6,11 +6,16 @@ AI 기반 실시간 아기 모니터링 시스템입니다. 비전 AI와 오디�
 
 ## 주요 기능
 
-### 비전 AI 분석 (Ollama Qwen3-VL)
-- 아기 자세 분석 (바로 누움/엎드림/옆으로 누움)
-- 얼굴 가림 감지 (이불, 베개 등)
-- 침대 이탈 감지
-- 위험도 자동 평가 (안전/주의/위험)
+### 비전 AI 분석 (2단계 아키텍처)
+- **1단계 VLM**: Ollama Qwen3-VL이 카메라 이미지를 자연어로 분석
+  - 아기 자세 분석 (바로 누움/엎드림/옆으로 누움)
+  - 얼굴 가림 감지 (이불, 베개 등)
+  - 침대 이탈 감지
+  - 한국어 프롬프트로 SIDS 예방 가이드라인 기반 분석
+- **2단계 LLM**: VLM 분석 결과를 읽고 위험도 판단
+  - 위험 수준 평가 (안전/주의/위험)
+  - 알림 필요성 자동 판단
+  - Discord 채널 자동 라우팅 (alert/status)
 
 ### 움직임 감지 (Optical Flow)
 - Lucas-Kanade 알고리즘 기반 실시간 움직임 추적
@@ -25,8 +30,41 @@ AI 기반 실시간 아기 모니터링 시스템입니다. 비전 AI와 오디�
 ### Discord 알림 시스템
 - **경고 채널**: 위험 상황 즉시 알림 + 캡처 사진
 - **상태 채널**: 5분마다 요약 보고서
+- LLM이 자동으로 알림 필요성 판단하여 적절한 채널로 라우팅
 
 ![Discord Alert](discord-with-camera-photo.png)
+
+### 관리자 페이지
+- **/admin** 엔드포인트로 접속
+- VLM 프롬프트 실시간 수정
+- 위험 감지 기준 커스터마이징
+- 기본값 초기화 기능
+- 변경사항 즉시 적용 (재시작 불필요)
+
+## AI 분석 아키텍처
+
+```
+카메라 이미지
+    ↓
+[1단계] Ollama Qwen3-VL (VLM)
+    - 한국어 프롬프트로 이미지 분석
+    - SIDS 예방 가이드라인 기반
+    - 자연어 설명 생성 (플레인 텍스트)
+    ↓
+[2단계] Ollama Qwen3-VL (LLM)
+    - VLM 분석 결과 읽고 판단
+    - 위험도 평가 (safe/warning/danger)
+    - 알림 필요성 결정
+    - Discord 채널 라우팅 (alert/status)
+    ↓
+Discord 알림 전송
+```
+
+**주요 특징**:
+- 플레인 텍스트 기반 프롬프트 (마크다운 미사용)
+- 한국어 SIDS 안전 가이드라인
+- 관리자 페이지에서 프롬프트 실시간 수정 가능
+- DB 저장으로 재시작 후에도 설정 유지
 
 ## 기술 스택
 
@@ -210,6 +248,8 @@ cloudflared tunnel run my-baby-cam
 - **상태 대시보드**: 아기/움직임/오디오 실시간 상태
 - **통계**: 분석 횟수, 알림 횟수, 울음 감지 횟수
 - **히스토리**: Discord 로그, 영상 분석, 이벤트 기록
+- **설정 패널**: 카메라/마이크 선택, AI 분석 카메라 설정
+- **관리자 페이지**: VLM 프롬프트 실시간 수정 및 위험 감지 기준 조정
 
 ![Full Pipeline](final-full-pipeline.png)
 
@@ -220,7 +260,7 @@ baby-safety-cam-ai/
 ├── src/
 │   ├── main.py           # Flask 앱 + API 엔드포인트
 │   ├── vision/
-│   │   ├── analyzer.py   # Ollama VQA 분석
+│   │   ├── analyzer.py   # 2단계 VLM 분석 (VLM → LLM 판단)
 │   │   ├── motion.py     # Optical Flow 움직임 감지
 │   │   └── schemas.py    # Pydantic 스키마
 │   ├── audio/
@@ -237,7 +277,8 @@ baby-safety-cam-ai/
 │   └── utils/
 │       └── config.py     # 환경 설정
 ├── templates/
-│   └── index.html        # 웹 UI
+│   ├── index.html        # 웹 UI 메인 페이지
+│   └── admin.html        # 관리자 설정 페이지
 ├── static/
 │   ├── css/
 │   └── js/
@@ -248,7 +289,8 @@ baby-safety-cam-ai/
 
 | 엔드포인트 | 메서드 | 설명 |
 |------------|--------|------|
-| `/` | GET | 웹 UI |
+| `/` | GET | 웹 UI 메인 페이지 |
+| `/admin` | GET | 관리자 설정 페이지 |
 | `/video_feed` | GET | MJPEG 비디오 스트림 |
 | `/api/stats` | GET | 통계 정보 |
 | `/api/test_alert` | POST | 테스트 알림 전송 |
@@ -256,6 +298,9 @@ baby-safety-cam-ai/
 | `/api/history/discord` | GET | Discord 로그 |
 | `/api/history/vision` | GET | 영상 분석 로그 |
 | `/api/history/events` | GET | 이벤트 로그 |
+| `/api/config/vlm_prompt` | GET | VLM 프롬프트 조회 |
+| `/api/config/vlm_prompt` | POST | VLM 프롬프트 저장 |
+| `/api/config/vlm_prompt/default` | GET | 기본 프롬프트 조회 |
 
 ## 라이선스
 
