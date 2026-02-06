@@ -722,8 +722,8 @@
             <ul class="nav-links">
                 <li><a href="#features">기능</a></li>
                 <li><a href="#tech">기술 스택</a></li>
-                <li><a href="#screenshots">스크린샷</a></li>
                 <li><a href="#how-it-works">설치 방법</a></li>
+                <li><a href="#external-access">외부 접속</a></li>
             </ul>
             <a href="https://github.com/malacca-whale/baby-safety-cam-ai" class="nav-cta">GitHub</a>
         </nav>
@@ -1012,6 +1012,57 @@
                     <h3>모니터링 시작!</h3>
                     <p>서버를 실행하고 웹 브라우저에서 대시보드에 접속합니다.</p>
                     <code>uv run python -m src.main</code>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="how-it-works" id="external-access">
+        <div class="section-header">
+            <span class="section-tag">외부 접속</span>
+            <h2>어디서든 접속하기</h2>
+            <p>Cloudflare Tunnel로 외부에서 안전하게 접속할 수 있습니다 (무료)</p>
+        </div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">&#9989;</div>
+                <div class="step-content">
+                    <h3>필요 사항</h3>
+                    <p><strong>Cloudflare 무료 계정</strong>이 필요합니다. <a href="https://dash.cloudflare.com/sign-up" target="_blank" style="color: var(--accent);">cloudflare.com</a>에서 가입하세요. 신용카드 없이 무료로 사용 가능합니다.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>cloudflared 설치</h3>
+                    <p>Cloudflare Tunnel 클라이언트를 설치합니다.</p>
+                    <code>brew install cloudflared</code>
+                    <p style="margin-top: 8px; font-size: 0.85rem; color: var(--text-muted);">Linux: apt/dpkg로 설치 가능</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>설정 스크립트 실행</h3>
+                    <p>브라우저가 열리면 Cloudflare 계정으로 로그인합니다. 터널이 자동 생성됩니다.</p>
+                    <code>./scripts/setup-tunnel.sh</code>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>터널 실행</h3>
+                    <p>서버 실행 후 별도 터미널에서 터널을 시작합니다.</p>
+                    <code>./scripts/run-tunnel.sh</code>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">&#127760;</div>
+                <div class="step-content">
+                    <h3>외부 접속 완료!</h3>
+                    <p>이제 어디서든 HTTPS로 안전하게 접속할 수 있습니다.</p>
+                    <code style="background: var(--accent-light); color: var(--accent);">https://baby-cam-{hash}.cfargotunnel.com</code>
+                    <p style="margin-top: 8px; font-size: 0.85rem; color: var(--text-muted);">터널이 실행 중일 때만 외부 접속 가능. URL은 영구 유지됩니다.</p>
                 </div>
             </div>
         </div>

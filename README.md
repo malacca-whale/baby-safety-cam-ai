@@ -111,43 +111,97 @@ uv run python -m src.main
 
 ## 외부 접속 (Cloudflare Tunnel)
 
-외부에서 접속 가능한 HTTPS URL을 무료로 생성할 수 있습니다.
+외부에서 HTTPS로 안전하게 접속할 수 있는 고정 URL을 무료로 생성합니다.
 
-### 최초 설정 (한 번만)
+### 사전 요구사항
+
+| 항목 | 요구사항 |
+|------|----------|
+| **Cloudflare 계정** | 무료 계정 (신용카드 불필요) |
+| **cloudflared** | Cloudflare Tunnel CLI 도구 |
+
+### 1. Cloudflare 계정 생성 (최초 1회)
+
+1. [dash.cloudflare.com/sign-up](https://dash.cloudflare.com/sign-up) 접속
+2. 이메일과 비밀번호로 가입 (무료)
+3. 이메일 인증 완료
+
+> 💡 **무료 플랜**으로 충분합니다. 도메인 등록이나 신용카드가 필요하지 않습니다.
+
+### 2. cloudflared 설치
 
 ```bash
-# 설정 스크립트 실행
+# macOS
+brew install cloudflared
+
+# Linux (Debian/Ubuntu)
+curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+sudo dpkg -i cloudflared.deb
+
+# 설치 확인
+cloudflared --version
+```
+
+### 3. 터널 설정 (최초 1회)
+
+```bash
 ./scripts/setup-tunnel.sh
 ```
 
-브라우저가 열리면 Cloudflare 계정으로 로그인하세요 (무료 계정 가능).
+실행하면:
+1. 브라우저가 열림 → Cloudflare 로그인
+2. 터널 `baby-cam-{hash}` 자동 생성
+3. 설정 파일 `~/.cloudflared/config.yml` 생성
 
-### 터널 실행
+### 4. 터널 실행
 
 ```bash
-# 터널 시작
+# 터미널 1: 서버 실행
+uv run python -m src.main
+
+# 터미널 2: 터널 실행
 ./scripts/run-tunnel.sh
 ```
 
-외부 접속 URL: `https://baby-cam-e9a2888148d3.cfargotunnel.com`
+### 외부 접속 URL
+
+```
+https://baby-cam-e9a2888148d3.cfargotunnel.com
+```
+
+### 참고 사항
+
+| 항목 | 설명 |
+|------|------|
+| **URL 유지** | 터널 이름이 같으면 URL 영구 유지 |
+| **접속 조건** | `cloudflared`가 실행 중일 때만 외부 접속 가능 |
+| **보안** | Cloudflare가 HTTPS 자동 제공 (인증서 관리 불필요) |
+| **비용** | 완전 무료 (Cloudflare Zero Trust 무료 티어) |
 
 ### 수동 설정 (선택사항)
 
-```bash
-# 1. cloudflared 설치
-brew install cloudflared
+스크립트 대신 직접 설정하려면:
 
-# 2. 로그인
+```bash
+# 1. Cloudflare 로그인
 cloudflared tunnel login
 
-# 3. 터널 생성
-cloudflared tunnel create baby-cam-e9a2888148d3
+# 2. 터널 생성 (이름은 원하는대로)
+cloudflared tunnel create my-baby-cam
+
+# 3. 설정 파일 생성 (~/.cloudflared/config.yml)
+cat > ~/.cloudflared/config.yml << EOF
+tunnel: <TUNNEL_ID>
+credentials-file: ~/.cloudflared/<TUNNEL_ID>.json
+ingress:
+  - hostname: my-baby-cam.cfargotunnel.com
+    service: http://localhost:8080
+  - service: http_status:404
+EOF
 
 # 4. 터널 실행
-cloudflared tunnel --url http://localhost:8080 run baby-cam-e9a2888148d3
+cloudflared tunnel run my-baby-cam
 ```
-
-> **참고**: 터널은 `cloudflared`가 실행 중일 때만 외부 접속이 가능합니다. URL은 영구적으로 유지됩니다.
 
 ## 웹 UI 기능
 
