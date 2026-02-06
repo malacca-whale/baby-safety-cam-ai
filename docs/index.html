@@ -233,13 +233,6 @@
             position: relative;
         }
 
-        .hero-image img {
-            width: 100%;
-            border-radius: 20px;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--border);
-        }
-
         .floating-badge {
             position: absolute;
             background: var(--bg-card);
@@ -252,6 +245,7 @@
             align-items: center;
             gap: 10px;
             box-shadow: var(--shadow-lg);
+            z-index: 2;
         }
 
         .floating-badge.safe {
@@ -279,6 +273,489 @@
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-8px); }
         }
+
+        /* ===== Mockup UI Components ===== */
+        .mockup-window {
+            background: #0f172a;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .mockup-titlebar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 18px;
+            background: #1e293b;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .mockup-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .mockup-dot.red { background: #ef4444; }
+        .mockup-dot.yellow { background: #f59e0b; }
+        .mockup-dot.green { background: #22c55e; }
+
+        .mockup-url {
+            flex: 1;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #64748b;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        .mockup-body {
+            padding: 16px;
+        }
+
+        /* Hero dashboard mockup */
+        .mockup-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .mockup-logo-text {
+            color: #e2e8f0;
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .mockup-nav-pills {
+            display: flex;
+            gap: 6px;
+        }
+
+        .mockup-nav-pill {
+            background: rgba(255,255,255,0.06);
+            color: #94a3b8;
+            font-size: 0.55rem;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .mockup-video-area {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-radius: 12px;
+            height: 160px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255,255,255,0.06);
+            overflow: hidden;
+        }
+
+        .mockup-video-area::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 30% 40%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 60%, rgba(168, 85, 247, 0.06) 0%, transparent 50%);
+        }
+
+        .mockup-crib {
+            position: relative;
+            z-index: 1;
+        }
+
+        .mockup-crib-icon {
+            font-size: 2.8rem;
+            filter: grayscale(0.3);
+            opacity: 0.9;
+        }
+
+        .mockup-scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.6), transparent);
+            animation: scan 3s ease-in-out infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        .mockup-video-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            font-size: 0.5rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 4px;
+            z-index: 1;
+        }
+
+        .mockup-video-badge .rec-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #ef4444;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .mockup-video-overlay {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            color: #94a3b8;
+            font-size: 0.5rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            z-index: 1;
+        }
+
+        .mockup-status-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .mockup-status-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
+
+        .mockup-status-label {
+            font-size: 0.5rem;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .mockup-status-value {
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .mockup-status-value.safe { color: #4ade80; }
+        .mockup-status-value.active { color: #60a5fa; }
+        .mockup-status-value.quiet { color: #a78bfa; }
+
+        .mockup-ai-box {
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
+
+        .mockup-ai-label {
+            font-size: 0.5rem;
+            color: #818cf8;
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .mockup-ai-text {
+            font-size: 0.55rem;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+
+        /* Discord mockup */
+        .mockup-discord {
+            background: #313338;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .mockup-discord-sidebar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: #2b2d31;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .mockup-discord-hash {
+            color: #80848e;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .mockup-discord-channel {
+            color: #f2f3f5;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .mockup-discord-body {
+            padding: 16px;
+        }
+
+        .mockup-discord-msg {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .mockup-discord-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .mockup-discord-msg-content {
+            flex: 1;
+        }
+
+        .mockup-discord-author {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .mockup-discord-author .name {
+            color: #949cf7;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .mockup-discord-author .bot-tag {
+            background: #5865f2;
+            color: white;
+            font-size: 0.55rem;
+            font-weight: 600;
+            padding: 1px 5px;
+            border-radius: 3px;
+        }
+
+        .mockup-discord-author .time {
+            color: #80848e;
+            font-size: 0.65rem;
+        }
+
+        .mockup-discord-text {
+            color: #dbdee1;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .mockup-discord-embed {
+            border-left: 4px solid;
+            border-radius: 4px;
+            background: #2b2d31;
+            padding: 12px 14px;
+            max-width: 400px;
+        }
+
+        .mockup-discord-embed.alert-embed {
+            border-color: #ed4245;
+        }
+
+        .mockup-discord-embed.status-embed {
+            border-color: #57f287;
+        }
+
+        .mockup-discord-embed-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .mockup-discord-embed.alert-embed .mockup-discord-embed-title {
+            color: #ed4245;
+        }
+
+        .mockup-discord-embed.status-embed .mockup-discord-embed-title {
+            color: #57f287;
+        }
+
+        .mockup-discord-embed-field {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 6px;
+        }
+
+        .mockup-discord-embed-field-item {
+            flex: 1;
+        }
+
+        .mockup-discord-embed-field-item .label {
+            color: #80848e;
+            font-size: 0.6rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .mockup-discord-embed-field-item .value {
+            color: #dbdee1;
+            font-size: 0.7rem;
+        }
+
+        .mockup-discord-embed-img {
+            margin-top: 8px;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: 6px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            opacity: 0.8;
+        }
+
+        /* Architecture flow */
+        .arch-section {
+            background: var(--bg-primary);
+        }
+
+        .arch-flow {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        .arch-node {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            padding: 28px 36px;
+            text-align: center;
+            width: 100%;
+            max-width: 520px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .arch-node:hover {
+            border-color: var(--accent);
+            box-shadow: var(--shadow-lg);
+            transform: scale(1.02);
+        }
+
+        .arch-node-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .arch-node h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+
+        .arch-node p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .arch-node .arch-tag {
+            display: inline-block;
+            background: var(--accent-light);
+            color: var(--accent);
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-top: 8px;
+        }
+
+        .arch-node.camera { border-color: #3b82f6; }
+        .arch-node.camera:hover { box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15); }
+        .arch-node.vlm { border-color: #8b5cf6; }
+        .arch-node.vlm:hover { box-shadow: 0 10px 25px rgba(139, 92, 246, 0.15); }
+        .arch-node.llm { border-color: #6366f1; }
+        .arch-node.llm:hover { box-shadow: 0 10px 25px rgba(99, 102, 241, 0.15); }
+        .arch-node.discord-node { border-color: #5865f2; }
+        .arch-node.discord-node:hover { box-shadow: 0 10px 25px rgba(88, 101, 242, 0.15); }
+
+        .arch-arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 0;
+            color: var(--text-muted);
+        }
+
+        .arch-arrow svg {
+            width: 24px;
+            height: 32px;
+        }
+
+        .arch-arrow-label {
+            font-size: 0.72rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            background: var(--bg-secondary);
+            padding: 2px 12px;
+            border-radius: 12px;
+            margin-bottom: 4px;
+        }
+
+        .arch-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            width: 100%;
+            max-width: 520px;
+        }
+
+        .arch-split .arch-node {
+            max-width: none;
+            padding: 20px 24px;
+        }
+
+        .arch-split .arch-node.alert-ch { border-color: #ef4444; }
+        .arch-split .arch-node.status-ch { border-color: #22c55e; }
 
         /* Section common */
         section {
@@ -373,7 +850,7 @@
             line-height: 1.6;
         }
 
-        /* Tech Stack - Detailed */
+        /* Tech Stack */
         .tech-stack {
             background: var(--bg-primary);
         }
@@ -447,7 +924,43 @@
             color: var(--text-muted);
         }
 
-        /* Open Source Section */
+        /* Preview section (replaces screenshots) */
+        .preview {
+            background: var(--bg-primary);
+        }
+
+        .preview-grid {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+        }
+
+        .preview-card {
+            transition: all 0.3s;
+        }
+
+        .preview-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .preview-card .caption {
+            padding: 20px 4px;
+        }
+
+        .preview-card .caption h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .preview-card .caption p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Open Source */
         .opensource {
             background: var(--bg-secondary);
         }
@@ -507,53 +1020,6 @@
             border-radius: 6px;
             font-size: 0.75rem;
             font-weight: 500;
-        }
-
-        /* Screenshots */
-        .screenshots {
-            background: var(--bg-primary);
-        }
-
-        .screenshots-grid {
-            max-width: 1100px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 32px;
-        }
-
-        .screenshot-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            transition: all 0.3s;
-        }
-
-        .screenshot-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .screenshot-card img {
-            width: 100%;
-            display: block;
-        }
-
-        .screenshot-card .caption {
-            padding: 24px;
-        }
-
-        .screenshot-card .caption h3 {
-            font-size: 1.15rem;
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
-
-        .screenshot-card .caption p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
         }
 
         /* How it works */
@@ -694,7 +1160,7 @@
                 grid-template-columns: 1fr;
             }
 
-            .screenshots-grid {
+            .preview-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -709,6 +1175,14 @@
             .section-header h2 {
                 font-size: 1.8rem;
             }
+
+            .arch-split {
+                grid-template-columns: 1fr;
+            }
+
+            .arch-node {
+                padding: 20px 24px;
+            }
         }
     </style>
 </head>
@@ -721,9 +1195,9 @@
             </a>
             <ul class="nav-links">
                 <li><a href="#features">기능</a></li>
+                <li><a href="#architecture">아키텍처</a></li>
                 <li><a href="#tech">기술 스택</a></li>
                 <li><a href="#how-it-works">설치 방법</a></li>
-                <li><a href="#external-access">외부 접속</a></li>
             </ul>
             <a href="https://github.com/malacca-whale/baby-safety-cam-ai" class="nav-cta">GitHub</a>
         </nav>
@@ -747,7 +1221,51 @@
                 </div>
             </div>
             <div class="hero-image">
-                <img src="images/web-ui.png" alt="Baby Safety Cam Web UI">
+                <!-- CSS Dashboard Mockup -->
+                <div class="mockup-window">
+                    <div class="mockup-titlebar">
+                        <div class="mockup-dot red"></div>
+                        <div class="mockup-dot yellow"></div>
+                        <div class="mockup-dot green"></div>
+                        <div class="mockup-url">localhost:8080</div>
+                    </div>
+                    <div class="mockup-body">
+                        <div class="mockup-header-bar">
+                            <div class="mockup-logo-text">&#128118; Baby Safety Cam AI</div>
+                            <div class="mockup-nav-pills">
+                                <div class="mockup-nav-pill">Discord</div>
+                                <div class="mockup-nav-pill">Vision</div>
+                                <div class="mockup-nav-pill">Events</div>
+                            </div>
+                        </div>
+                        <div class="mockup-video-area">
+                            <div class="mockup-scan-line"></div>
+                            <div class="mockup-video-badge"><span class="rec-dot"></span> LIVE</div>
+                            <div class="mockup-crib">
+                                <div class="mockup-crib-icon">&#128118;</div>
+                            </div>
+                            <div class="mockup-video-overlay">1280 x 720 &bull; 30fps</div>
+                        </div>
+                        <div class="mockup-status-row">
+                            <div class="mockup-status-card">
+                                <div class="mockup-status-label">Baby Status</div>
+                                <div class="mockup-status-value safe">&#9989; 안전</div>
+                            </div>
+                            <div class="mockup-status-card">
+                                <div class="mockup-status-label">Motion</div>
+                                <div class="mockup-status-value active">&#128994; 감지됨</div>
+                            </div>
+                            <div class="mockup-status-card">
+                                <div class="mockup-status-label">Audio</div>
+                                <div class="mockup-status-value quiet">&#127925; 조용함</div>
+                            </div>
+                        </div>
+                        <div class="mockup-ai-box">
+                            <div class="mockup-ai-label">&#129302; AI 분석 결과</div>
+                            <div class="mockup-ai-text">아기가 바로 누운 자세로 안전하게 수면 중입니다. 얼굴이 잘 보이며 호흡에 문제가 없어 보입니다. 이불이 가슴 아래로 잘 정리되어 있습니다.</div>
+                        </div>
+                    </div>
+                </div>
                 <div class="floating-badge safe">
                     <span class="badge-dot green"></span>
                     안전 - 정상 수면 중
@@ -798,16 +1316,188 @@
                 <p>SQLite 데이터베이스에 모든 분석 결과와 이벤트가 저장되어 히스토리를 확인할 수 있습니다.</p>
             </div>
         </div>
-        <div class="features-grid" style="margin-top: 24px; grid-template-columns: repeat(2, 1fr);">
+        <div class="features-grid" style="margin-top: 24px; max-width: 820px; grid-template-columns: repeat(2, 1fr);">
             <div class="feature-card">
                 <div class="feature-icon" style="background: linear-gradient(135deg, #fef3c7, #fde68a);">&#9881;</div>
                 <h3>관리자 페이지</h3>
                 <p>/admin 엔드포인트로 VLM 프롬프트를 실시간 수정할 수 있습니다. 위험 감지 기준을 직접 커스터마이징하고 즉시 적용할 수 있습니다.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon" style="background: linear-gradient(135deg, #ede9fe, #ddd6fe);">&#127471;&#127479;</div>
+                <div class="feature-icon" style="background: linear-gradient(135deg, #ede9fe, #ddd6fe);">&#127468;&#127468;</div>
                 <h3>한국어 SIDS 가이드</h3>
                 <p>한국어 프롬프트로 AAP SIDS 예방 가이드라인 기반 분석을 수행합니다. 플레인 텍스트 기반으로 자연스러운 설명을 제공합니다.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Architecture Flow Section -->
+    <section class="arch-section" id="architecture">
+        <div class="section-header">
+            <span class="section-tag">AI 아키텍처</span>
+            <h2>2단계 분석 파이프라인</h2>
+            <p>VLM이 이미지를 분석하고, LLM이 위험도를 판단하여 알림을 전송합니다</p>
+        </div>
+        <div class="arch-flow">
+            <div class="arch-node camera">
+                <div class="arch-node-icon">&#127909;</div>
+                <h4>카메라 캡처</h4>
+                <p>웹캠에서 실시간 프레임 캡처 (512px 리사이즈)</p>
+                <span class="arch-tag">OpenCV &bull; MJPEG</span>
+            </div>
+
+            <div class="arch-arrow">
+                <div class="arch-arrow-label">이미지 전달</div>
+                <svg viewBox="0 0 24 32" fill="none"><path d="M12 0 L12 24 M6 18 L12 24 L18 18" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+
+            <div class="arch-node vlm">
+                <div class="arch-node-icon">&#128065;</div>
+                <h4>1단계: VLM 이미지 분석</h4>
+                <p>한국어 프롬프트로 SIDS 가이드라인 기반 분석<br>자세, 얼굴 가림, 침대 이탈 등 자연어 설명 생성</p>
+                <span class="arch-tag">Ollama &bull; Qwen3-VL &bull; 플레인 텍스트</span>
+            </div>
+
+            <div class="arch-arrow">
+                <div class="arch-arrow-label">자연어 분석 결과</div>
+                <svg viewBox="0 0 24 32" fill="none"><path d="M12 0 L12 24 M6 18 L12 24 L18 18" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+
+            <div class="arch-node llm">
+                <div class="arch-node-icon">&#129302;</div>
+                <h4>2단계: LLM 위험도 판단</h4>
+                <p>VLM 분석 결과를 읽고 위험 수준 평가<br>알림 필요성 결정 및 채널 자동 라우팅</p>
+                <span class="arch-tag">safe / warning / danger</span>
+            </div>
+
+            <div class="arch-arrow">
+                <svg viewBox="0 0 24 32" fill="none"><path d="M12 0 L12 24 M6 18 L12 24 L18 18" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+
+            <div class="arch-split">
+                <div class="arch-node alert-ch">
+                    <div class="arch-node-icon">&#128680;</div>
+                    <h4>#baby-alert</h4>
+                    <p>위험/경고 상황<br>즉시 알림 + 사진</p>
+                </div>
+                <div class="arch-node status-ch">
+                    <div class="arch-node-icon">&#128221;</div>
+                    <h4>#baby-status</h4>
+                    <p>통상 보고<br>5분마다 요약</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Preview Section (CSS mockups instead of screenshots) -->
+    <section class="preview" id="preview">
+        <div class="section-header">
+            <span class="section-tag">시스템 미리보기</span>
+            <h2>실제 동작 화면</h2>
+            <p>웹 대시보드와 Discord 알림 인터페이스</p>
+        </div>
+        <div class="preview-grid">
+            <div class="preview-card">
+                <!-- Web Dashboard Detailed Mockup -->
+                <div class="mockup-window">
+                    <div class="mockup-titlebar">
+                        <div class="mockup-dot red"></div>
+                        <div class="mockup-dot yellow"></div>
+                        <div class="mockup-dot green"></div>
+                        <div class="mockup-url">localhost:8080/admin</div>
+                    </div>
+                    <div class="mockup-body">
+                        <div class="mockup-header-bar">
+                            <div class="mockup-logo-text">&#9881; 관리자 설정</div>
+                            <div class="mockup-nav-pills">
+                                <div class="mockup-nav-pill" style="background: rgba(99,102,241,0.15); color: #818cf8;">&#127968; 메인</div>
+                            </div>
+                        </div>
+                        <div class="mockup-ai-box" style="margin-bottom: 10px;">
+                            <div class="mockup-ai-label">&#129302; VLM 프롬프트 설정</div>
+                            <div style="background: rgba(0,0,0,0.2); border-radius: 6px; padding: 8px 10px; margin-top: 6px;">
+                                <div class="mockup-ai-text" style="font-family: 'SF Mono', Monaco, monospace; font-size: 0.5rem; color: #a78bfa; line-height: 1.6;">
+                                    당신은 SIDS 예방 가이드라인으로 훈련된 아기 수면 안전 모니터링 AI입니다.<br><br>
+                                    이 아기 카메라 이미지를 주의 깊게 분석하세요...<br>
+                                    1. 아기 보임? 이미지에 아기가 보입니까?<br>
+                                    2. 수면 자세: 바로 누운 자세, 엎드린 자세...<br>
+                                    3. 얼굴 가려짐? 코/입 부분이 덮여있습니까?
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 6px;">
+                            <div style="background: rgba(99,102,241,0.2); color: #818cf8; font-size: 0.55rem; font-weight: 600; padding: 5px 12px; border-radius: 6px;">&#128190; 저장</div>
+                            <div style="background: rgba(255,255,255,0.06); color: #64748b; font-size: 0.55rem; font-weight: 600; padding: 5px 12px; border-radius: 6px;">&#128260; 기본값 초기화</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="caption">
+                    <h3>관리자 페이지</h3>
+                    <p>VLM 프롬프트 실시간 수정, 위험 감지 기준 커스터마이징</p>
+                </div>
+            </div>
+            <div class="preview-card">
+                <!-- Discord Alert Mockup -->
+                <div class="mockup-discord">
+                    <div class="mockup-discord-sidebar">
+                        <div class="mockup-discord-hash">#</div>
+                        <div class="mockup-discord-channel">baby-alert</div>
+                    </div>
+                    <div class="mockup-discord-body">
+                        <div class="mockup-discord-msg">
+                            <div class="mockup-discord-avatar">&#128118;</div>
+                            <div class="mockup-discord-msg-content">
+                                <div class="mockup-discord-author">
+                                    <span class="name">Baby Safety Cam</span>
+                                    <span class="bot-tag">BOT</span>
+                                    <span class="time">오늘 오전 3:42</span>
+                                </div>
+                                <div class="mockup-discord-text">&#128680; 위험 감지 알림</div>
+                                <div class="mockup-discord-embed alert-embed">
+                                    <div class="mockup-discord-embed-title">&#9888;&#65039; 엎드린 자세 감지</div>
+                                    <div class="mockup-discord-embed-field">
+                                        <div class="mockup-discord-embed-field-item">
+                                            <div class="label">위험 수준</div>
+                                            <div class="value" style="color: #ed4245;">&#128308; DANGER</div>
+                                        </div>
+                                        <div class="mockup-discord-embed-field-item">
+                                            <div class="label">감지 시각</div>
+                                            <div class="value">03:42:15 KST</div>
+                                        </div>
+                                    </div>
+                                    <div class="mockup-discord-embed-field">
+                                        <div class="mockup-discord-embed-field-item" style="flex: none; width: 100%;">
+                                            <div class="label">AI 분석</div>
+                                            <div class="value">아기가 엎드린 자세로 감지되었습니다. 얼굴이 매트리스 쪽을 향하고 있어 질식 위험이 있습니다.</div>
+                                        </div>
+                                    </div>
+                                    <div class="mockup-discord-embed-img">&#128247;</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mockup-discord-msg" style="opacity: 0.5; margin-bottom: 0;">
+                            <div class="mockup-discord-avatar" style="background: linear-gradient(135deg, #22c55e, #16a34a);">&#128221;</div>
+                            <div class="mockup-discord-msg-content">
+                                <div class="mockup-discord-author">
+                                    <span class="name" style="color: #57f287;">Baby Safety Cam</span>
+                                    <span class="bot-tag">BOT</span>
+                                    <span class="time">오늘 오전 3:35</span>
+                                </div>
+                                <div class="mockup-discord-embed status-embed" style="margin-top: 4px;">
+                                    <div class="mockup-discord-embed-title">&#9989; 정상 상태 보고</div>
+                                    <div class="mockup-discord-embed-field">
+                                        <div class="mockup-discord-embed-field-item">
+                                            <div class="value" style="font-size: 0.65rem;">바로 누운 자세로 안전하게 수면 중...</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="caption">
+                    <h3>Discord 알림</h3>
+                    <p>위험 감지 시 즉시 경고 + 캡처 사진, 통상 보고는 상태 채널로</p>
+                </div>
             </div>
         </div>
     </section>
@@ -958,30 +1648,6 @@
                     <h4>Librosa</h4>
                     <p>오디오 및 음악 분석 Python 라이브러리입니다. 울음 및 호흡 패턴을 감지합니다.</p>
                     <span class="tag">librosa.org</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="screenshots" id="screenshots">
-        <div class="section-header">
-            <span class="section-tag">스크린샷</span>
-            <h2>직관적인 인터페이스</h2>
-            <p>깔끔하고 사용하기 쉬운 웹 대시보드를 제공합니다</p>
-        </div>
-        <div class="screenshots-grid">
-            <div class="screenshot-card">
-                <img src="images/web-ui.png" alt="Web Dashboard">
-                <div class="caption">
-                    <h3>웹 대시보드</h3>
-                    <p>실시간 비디오, 상태 카드, 히스토리를 한눈에 확인할 수 있는 다크 모드 UI</p>
-                </div>
-            </div>
-            <div class="screenshot-card">
-                <img src="images/discord-alert.png" alt="Discord Alert">
-                <div class="caption">
-                    <h3>Discord 알림</h3>
-                    <p>위험 감지 시 캡처 사진과 함께 즉시 알림 전송</p>
                 </div>
             </div>
         </div>
