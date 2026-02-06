@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baby Safety Cam AI - AI 기반 아기 모니터링 시스템</title>
+    <meta name="description" content="AI 비전과 오디오 분석을 활용한 실시간 아기 안전 모니터링 시스템. Discord 알림으로 아기의 안전을 24시간 지켜드립니다.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --text-primary: #f4f4f5;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: #27272a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent), #a855f7);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-cta {
+            background: var(--accent);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        .nav-cta:hover {
+            background: var(--accent-hover);
+        }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 120px 24px 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .hero-text h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-text h1 span {
+            background: linear-gradient(135deg, var(--accent) 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-text p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            max-width: 500px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+            border-color: var(--text-muted);
+        }
+
+        .hero-image {
+            position: relative;
+        }
+
+        .hero-image img {
+            width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border);
+        }
+
+        .floating-badge {
+            position: absolute;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .floating-badge.safe {
+            bottom: 20px;
+            left: -30px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .floating-badge.alert {
+            top: 40px;
+            right: -20px;
+            animation: float 3s ease-in-out infinite 0.5s;
+        }
+
+        .badge-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .badge-dot.green { background: var(--success); }
+        .badge-dot.yellow { background: var(--warning); }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Features */
+        .features {
+            padding: 100px 24px;
+            background: var(--bg-secondary);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-tag {
+            display: inline-block;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--accent);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .section-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .feature-icon.vision { background: rgba(99, 102, 241, 0.15); }
+        .feature-icon.motion { background: rgba(34, 197, 94, 0.15); }
+        .feature-icon.audio { background: rgba(245, 158, 11, 0.15); }
+        .feature-icon.discord { background: rgba(88, 101, 242, 0.15); }
+        .feature-icon.realtime { background: rgba(236, 72, 153, 0.15); }
+        .feature-icon.db { background: rgba(6, 182, 212, 0.15); }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* How it works */
+        .how-it-works {
+            padding: 100px 24px;
+        }
+
+        .steps {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .step {
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent), #a855f7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .step-content p {
+            color: var(--text-secondary);
+        }
+
+        /* Screenshots */
+        .screenshots {
+            padding: 100px 24px;
+            background: var(--bg-secondary);
+        }
+
+        .screenshots-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+        }
+
+        .screenshot-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .screenshot-card img {
+            width: 100%;
+            display: block;
+        }
+
+        .screenshot-card .caption {
+            padding: 20px;
+        }
+
+        .screenshot-card .caption h3 {
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .screenshot-card .caption p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Tech Stack */
+        .tech-stack {
+            padding: 100px 24px;
+        }
+
+        .tech-grid {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+        }
+
+        .tech-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+
+        .tech-item:hover {
+            border-color: var(--text-muted);
+        }
+
+        .tech-item .icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+
+        .tech-item h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .tech-item p {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        /* CTA */
+        .cta {
+            padding: 100px 24px;
+            text-align: center;
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+        }
+
+        .cta h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .cta p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 32px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 24px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: var(--text-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .hero-text h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-text p {
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .hero-buttons {
+                justify-content: center;
+            }
+
+            .floating-badge {
+                display: none;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .screenshots-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tech-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="#" class="logo">
+                <div class="logo-icon">&#128118;</div>
+                Baby Safety Cam
+            </a>
+            <ul class="nav-links">
+                <li><a href="#features">기능</a></li>
+                <li><a href="#how-it-works">작동 방식</a></li>
+                <li><a href="#screenshots">스크린샷</a></li>
+                <li><a href="#tech">기술 스택</a></li>
+            </ul>
+            <a href="https://github.com/malacca-whale/baby-safety-cam-ai" class="nav-cta">GitHub</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>AI가 지켜보는<br><span>아기의 안전</span></h1>
+                <p>비전 AI와 오디오 분석으로 아기의 상태를 24시간 모니터링하고, 위험 상황 발생 시 Discord로 즉각 알림을 보내드립니다.</p>
+                <div class="hero-buttons">
+                    <a href="https://github.com/malacca-whale/baby-safety-cam-ai" class="btn btn-primary">
+                        &#128187; GitHub에서 보기
+                    </a>
+                    <a href="#features" class="btn btn-secondary">
+                        자세히 알아보기 &#8594;
+                    </a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="images/web-ui.png" alt="Baby Safety Cam Web UI">
+                <div class="floating-badge safe">
+                    <span class="badge-dot green"></span>
+                    안전 - 정상 수면 중
+                </div>
+                <div class="floating-badge alert">
+                    <span class="badge-dot yellow"></span>
+                    Discord 알림 전송됨
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="section-header">
+            <span class="section-tag">주요 기능</span>
+            <h2>스마트한 아기 모니터링</h2>
+            <p>최신 AI 기술을 활용하여 아기의 안전을 종합적으로 모니터링합니다</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon vision">&#128065;</div>
+                <h3>비전 AI 분석</h3>
+                <p>Ollama Qwen3-VL 모델이 아기의 자세, 얼굴 가림, 침대 이탈을 실시간으로 분석하고 위험도를 평가합니다.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon motion">&#127939;</div>
+                <h3>움직임 감지</h3>
+                <p>Lucas-Kanade Optical Flow 알고리즘으로 아기의 움직임을 15FPS로 추적하고 패턴을 분석합니다.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon audio">&#127908;</div>
+                <h3>오디오 분석</h3>
+                <p>Librosa를 활용한 스펙트럼 분석으로 아기 울음과 호흡 패턴을 실시간으로 감지합니다.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon discord">&#128172;</div>
+                <h3>Discord 알림</h3>
+                <p>위험 상황 발생 시 즉시 경고 알림과 캡처 사진을 Discord로 전송합니다. 5분마다 상태 보고서도 제공됩니다.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon realtime">&#9889;</div>
+                <h3>실시간 스트리밍</h3>
+                <p>MJPEG 비디오와 WebSocket 오디오 스트리밍으로 어디서든 실시간으로 아기를 확인할 수 있습니다.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon db">&#128451;</div>
+                <h3>데이터 기록</h3>
+                <p>SQLite 데이터베이스에 모든 분석 결과와 이벤트가 저장되어 히스토리를 확인할 수 있습니다.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="how-it-works" id="how-it-works">
+        <div class="section-header">
+            <span class="section-tag">작동 방식</span>
+            <h2>간단한 4단계 설정</h2>
+            <p>몇 분 만에 AI 아기 모니터링 시스템을 시작할 수 있습니다</p>
+        </div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>프로젝트 설치</h3>
+                    <p>GitHub에서 프로젝트를 클론하고 uv로 의존성을 설치합니다. Python 3.11+와 Ollama가 필요합니다.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>AI 모델 다운로드</h3>
+                    <p>Ollama를 통해 Qwen3-VL 비전 모델을 다운로드합니다. 한 줄 명령어로 완료됩니다.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Discord 웹훅 설정</h3>
+                    <p>Discord 서버에 웹훅을 만들고 .env 파일에 URL을 입력합니다. 경고용과 상태 보고용 두 개의 채널을 사용합니다.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h3>모니터링 시작</h3>
+                    <p>서버를 실행하고 웹 브라우저에서 대시보드에 접속합니다. 이제 AI가 아기를 24시간 모니터링합니다.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="screenshots" id="screenshots">
+        <div class="section-header">
+            <span class="section-tag">스크린샷</span>
+            <h2>직관적인 인터페이스</h2>
+            <p>깔끔하고 사용하기 쉬운 웹 대시보드를 제공합니다</p>
+        </div>
+        <div class="screenshots-grid">
+            <div class="screenshot-card">
+                <img src="images/web-ui.png" alt="Web Dashboard">
+                <div class="caption">
+                    <h3>웹 대시보드</h3>
+                    <p>실시간 비디오, 상태 카드, 히스토리를 한눈에 확인</p>
+                </div>
+            </div>
+            <div class="screenshot-card">
+                <img src="images/discord-alert.png" alt="Discord Alert">
+                <div class="caption">
+                    <h3>Discord 알림</h3>
+                    <p>위험 감지 시 캡처 사진과 함께 즉시 알림 전송</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="tech-stack" id="tech">
+        <div class="section-header">
+            <span class="section-tag">기술 스택</span>
+            <h2>검증된 기술로 구축</h2>
+            <p>안정적이고 효율적인 오픈소스 기술을 사용합니다</p>
+        </div>
+        <div class="tech-grid">
+            <div class="tech-item">
+                <div class="icon">&#128013;</div>
+                <h4>Python 3.11</h4>
+                <p>백엔드</p>
+            </div>
+            <div class="tech-item">
+                <div class="icon">&#128293;</div>
+                <h4>Flask</h4>
+                <p>웹 프레임워크</p>
+            </div>
+            <div class="tech-item">
+                <div class="icon">&#129302;</div>
+                <h4>Ollama</h4>
+                <p>로컬 AI 추론</p>
+            </div>
+            <div class="tech-item">
+                <div class="icon">&#128064;</div>
+                <h4>OpenCV</h4>
+                <p>컴퓨터 비전</p>
+            </div>
+            <div class="tech-item">
+                <div class="icon">&#127925;</div>
+                <h4>Librosa</h4>
+                <p>오디오 분석</p>
+            </div>
+            <div class="tech-item">
+                <div class="icon">&#128172;</div>
+                <h4>Discord</h4>
+                <p>알림 시스템</p>
+            </div>
+            <div class="tech-item">
+                <div class="icon">&#128451;</div>
+                <h4>SQLite</h4>
+                <p>데이터베이스</p>
+            </div>
+            <div class="tech-item">
+                <div class="icon">&#9889;</div>
+                <h4>SocketIO</h4>
+                <p>실시간 통신</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta">
+        <h2>지금 바로 시작하세요</h2>
+        <p>오픈소스로 무료로 사용할 수 있습니다. GitHub에서 코드를 확인하고 직접 설치해보세요.</p>
+        <a href="https://github.com/malacca-whale/baby-safety-cam-ai" class="btn btn-primary">
+            &#128187; GitHub에서 시작하기
+        </a>
+    </section>
+
+    <footer>
+        <p>
+            Made with &#10084;&#65039; by <a href="https://github.com/malacca-whale">@malacca-whale</a>
+            &nbsp;&bull;&nbsp;
+            <a href="https://github.com/malacca-whale/baby-safety-cam-ai">GitHub</a>
+            &nbsp;&bull;&nbsp;
+            MIT License
+        </p>
+    </footer>
+</body>
+</html>
