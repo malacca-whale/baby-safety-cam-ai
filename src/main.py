@@ -24,6 +24,7 @@ app = Flask(
     static_folder="../static",
 )
 app.config["SECRET_KEY"] = "baby-monitor-secret"
+app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0  # Disable static file caching
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 ENABLE_VISION = True
