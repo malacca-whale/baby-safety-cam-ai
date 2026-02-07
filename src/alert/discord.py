@@ -28,7 +28,7 @@ class DiscordAlert:
         _, buffer = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 85])
         return buffer.tobytes()
 
-    def send_warning(self, title: str, description: str, risk_level: str, frame: np.ndarray | None = None):
+    def send_warning(self, title: str, description: str, risk_level: str, frame: np.ndarray | None = None, inference_time: float | None = None):
         try:
             webhook = DiscordWebhook(url=self.warning_url)
             color = RISK_COLORS.get(risk_level, "95a5a6")
@@ -40,6 +40,10 @@ class DiscordAlert:
             embed.set_timestamp(datetime.now().isoformat())
             risk_kr = {"safe": "안전", "warning": "주의", "danger": "위험"}
             embed.add_embed_field(name="위험 수준", value=risk_kr.get(risk_level, risk_level.upper()), inline=True)
+            if inference_time is not None:
+                mins, secs = divmod(int(inference_time), 60)
+                embed.add_embed_field(name="추론 시간", value=f"{mins}분 {secs}초", inline=True)
+            embed.add_embed_field(name="모델", value=Config.OLLAMA_MODEL, inline=True)
 
             has_image = False
             if frame is not None:
@@ -70,7 +74,7 @@ class DiscordAlert:
             )
             return None
 
-    def send_status_report(self, summary: str, frame: np.ndarray | None = None):
+    def send_status_report(self, summary: str, frame: np.ndarray | None = None, inference_time: float | None = None):
         try:
             webhook = DiscordWebhook(url=self.status_url)
             embed = DiscordEmbed(
@@ -79,6 +83,10 @@ class DiscordAlert:
                 color=int("3498db", 16),
             )
             embed.set_timestamp(datetime.now().isoformat())
+            if inference_time is not None:
+                mins, secs = divmod(int(inference_time), 60)
+                embed.add_embed_field(name="추론 시간", value=f"{mins}분 {secs}초", inline=True)
+            embed.add_embed_field(name="모델", value=Config.OLLAMA_MODEL, inline=True)
 
             has_image = False
             if frame is not None:

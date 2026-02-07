@@ -63,10 +63,11 @@ class Pipeline:
                 logger.warning(f"AI camera {self._ai_camera_id} failed, using streaming camera")
                 self.ai_camera = None
 
-        try:
-            self.audio.start(mic_id, socketio=self._socketio)
-        except Exception as e:
-            logger.warning(f"Audio start failed (continuing without audio): {e}")
+        # [TMP-OFF] Audio capture disabled for VLM-only testing
+        # try:
+        #     self.audio.start(mic_id, socketio=self._socketio)
+        # except Exception as e:
+        #     logger.warning(f"Audio start failed (continuing without audio): {e}")
 
         self._running = True
 
@@ -77,8 +78,9 @@ class Pipeline:
                 self._vision_thread.start()
                 logger.info("Vision analysis enabled")
 
-            self._motion_thread = threading.Thread(target=self._motion_loop, daemon=True)
-            self._motion_thread.start()
+            # [TMP-OFF] Motion detection disabled for VLM-only testing
+            # self._motion_thread = threading.Thread(target=self._motion_loop, daemon=True)
+            # self._motion_thread.start()
 
         self.db.log_event("pipeline_start", "info", {
             "camera": camera_ok, "vision": self.enable_vision,
@@ -136,36 +138,32 @@ class Pipeline:
             if frame is not None and self.vision:
                 self._vision_in_progress = True
                 self._last_vision_request_time = time.time()
+                with self._lock:
+                    self._last_combined.vlm_infer_started = datetime.now()
+                    self._last_combined.vlm_in_progress = True
                 logger.info("Vision analysis starting...")
                 try:
                     baby_status = self.vision.analyze_frame(frame)
                 finally:
                     self._vision_in_progress = False
-
-                audio_status = self.audio.get_status()
+                    with self._lock:
+                        self._last_combined.vlm_in_progress = False
 
                 with self._lock:
                     self._last_combined.baby = baby_status
-                    self._last_combined.audio = audio_status
                     self._last_combined.timestamp = datetime.now()
                     self._last_combined.last_vision_update = datetime.now()
-                    self._last_combined.last_audio_update = datetime.now()
 
-                motion_status = self._last_combined.motion
-                self.alert_manager.check_and_alert(baby_status, motion_status, frame)
-
+                # Discord alerts still fire based on VLM risk_level
                 elapsed = time.time() - self._last_vision_request_time
+                motion_status = self._last_combined.motion
+                self.alert_manager.check_and_alert(baby_status, motion_status, frame, inference_time=elapsed)
                 logger.info(f"Vision analysis completed in {elapsed:.1f}s")
 
-                t = time.time()
-                if audio_status.is_crying and (t - self._last_cry_alert_time > self._cry_cooldown):
-                    self.alert_manager.discord.send_warning(
-                        "Baby Crying Detected",
-                        audio_status.description,
-                        "warning",
-                        frame,
-                    )
-                    self._last_cry_alert_time = t
+                # [TMP-OFF] Cry detection disabled for VLM-only testing
+                # audio_status = self.audio.get_status()
+                # if audio_status.is_crying and (...):
+                #     self.alert_manager.discord.send_warning(...)
             else:
                 time.sleep(5)
 

@@ -43,3 +43,5 @@ class CombinedStatus(BaseModel):
     last_vision_update: datetime | None = None
     last_motion_update: datetime | None = None
     last_audio_update: datetime | None = None
+    vlm_infer_started: datetime | None = None
+    vlm_in_progress: bool = False

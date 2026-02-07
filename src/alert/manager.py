@@ -19,15 +19,17 @@ class AlertManager:
         self.last_warning_time: float = 0
         self.warning_cooldown = 30  # seconds between duplicate warnings
         self.last_report_time: float = time.time()
+        self._last_inference_time: float | None = None
         self._lock = threading.Lock()
 
-    def check_and_alert(self, baby: BabyStatus, motion: MotionStatus, frame: np.ndarray | None = None):
+    def check_and_alert(self, baby: BabyStatus, motion: MotionStatus, frame: np.ndarray | None = None, inference_time: float | None = None):
         with self._lock:
             self.status_history.append({
                 "baby": baby,
                 "motion": motion,
                 "timestamp": datetime.now(),
             })
+            self._last_inference_time = inference_time
 
         now = time.time()
 
@@ -46,7 +48,7 @@ class AlertManager:
 
             title = "위험: 즉시 확인 필요"
             desc = "\n".join(reasons) if reasons else baby.description
-            self.discord.send_warning(title, desc, "danger", frame)
+            self.discord.send_warning(title, desc, "danger", frame, inference_time=inference_time)
             self.last_warning_time = now
 
         elif baby.risk_level == "warning" and (now - self.last_warning_time > self.warning_cooldown):
@@ -55,6 +57,7 @@ class AlertManager:
                 baby.description,
                 "warning",
                 frame,
+                inference_time=inference_time,
             )
             self.last_warning_time = now
 
@@ -105,7 +108,7 @@ class AlertManager:
 
             summary = "\n".join(lines)
 
-        self.discord.send_status_report(summary, frame)
+        self.discord.send_status_report(summary, frame, inference_time=self._last_inference_time)
 
     def force_status_report(self, frame: np.ndarray | None = None):
         self._send_status_report(frame)

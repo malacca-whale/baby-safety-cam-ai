@@ -1,6 +1,7 @@
 import base64
 import json
 import logging
+import os
 import httpx
 import cv2
 import numpy as np
@@ -32,7 +33,7 @@ DEFAULT_ANALYSIS_PROMPT = """당신은 SIDS 예방 가이드라인(AAP 안전 �
 관찰한 내용을 자연스러운 한국어로 2-3문장으로 설명하세요. 아기의 상태와 안전성에 대해 명확하게 서술하세요."""
 
 
-VQA_MAX_SIZE = 256  # max width for Ollama VQA requests
+VQA_MAX_SIZE = 240  # max width for Ollama VQA requests
 
 
 class VisionAnalyzer:
@@ -133,9 +134,18 @@ JSON 형식으로만 답변하세요:
             # Fallback to safe defaults
             return "warning", "status", False
 
+    def _save_resized(self, small: np.ndarray):
+        out_dir = os.path.join(os.path.dirname(__file__), "..", "..", "output", "resized")
+        os.makedirs(out_dir, exist_ok=True)
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        path = os.path.join(out_dir, f"{ts}.jpg")
+        cv2.imwrite(path, small, [cv2.IMWRITE_JPEG_QUALITY, 70])
+        logger.info(f"Saved resized frame: {path}")
+
     def analyze_frame(self, frame: np.ndarray) -> BabyStatus:
         try:
             small = self._resize_for_vqa(frame)
+            self._save_resized(small)
             _, buffer = cv2.imencode(".jpg", small, [cv2.IMWRITE_JPEG_QUALITY, 70])
             image_b64 = base64.b64encode(buffer).decode("utf-8")
 

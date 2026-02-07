@@ -108,6 +108,7 @@ RestartSec=10
 StandardOutput=append:/home/gq/baby-ai-cam.log
 StandardError=append:/home/gq/baby-ai-cam.log
 Environment=HOME=/home/gq
+Environment=PYTHONUNBUFFERED=1
 
 [Install]
 WantedBy=multi-user.target

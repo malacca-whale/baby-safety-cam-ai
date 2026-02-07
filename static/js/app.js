@@ -285,6 +285,25 @@ async function updateStatus() {
         if (lastMotionEl) lastMotionEl.textContent = fmtDateTime(data.last_motion_update);
         if (lastAudioEl) lastAudioEl.textContent = fmtDateTime(data.last_audio_update);
 
+        // VLM inference elapsed time
+        const vlmEl = document.getElementById('vlmInferStatus');
+        const vlmItem = document.getElementById('vlmInferItem');
+        if (vlmEl && data.vlm_infer_started) {
+            const started = new Date(data.vlm_infer_started);
+            const elapsed = Math.floor((Date.now() - started.getTime()) / 1000);
+            const min = Math.floor(elapsed / 60);
+            const sec = elapsed % 60;
+            if (data.vlm_in_progress) {
+                vlmEl.textContent = `${min}분 ${sec}초 (추론중...)`;
+                if (vlmItem) vlmItem.style.background = 'rgba(234,179,8,0.15)';
+            } else {
+                vlmEl.textContent = `${min}분 ${sec}초 전 완료`;
+                if (vlmItem) vlmItem.style.background = '';
+            }
+        } else if (vlmEl) {
+            vlmEl.textContent = '대기중';
+        }
+
         // Update video timestamp HUD
         const videoTs = document.getElementById('videoTimestamp');
         if (videoTs) {
