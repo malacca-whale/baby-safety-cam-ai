@@ -3,11 +3,11 @@ set -e
 
 # ============================================
 # Baby AI Cam - Production Deployment Script
-# Target: gq@10.11.100.57
+# Target: gq@10.11.100.56
 # Ports: 54291 (web UI), 54292 (Ollama)
 # ============================================
 
-REMOTE_HOST="gq@10.11.100.57"
+REMOTE_HOST="gq@10.11.100.56"
 REMOTE_DIR="~/works/baby-ai-cam/baby-ai-cam-1"
 LOCAL_DIR="$(cd "$(dirname "$0")" && pwd)"
 
@@ -114,5 +114,5 @@ ssh "$REMOTE_HOST" 'if pgrep -f "python.*src.main" > /dev/null; then echo "=== B
 
 echo ""
 echo "=== Deployment Complete ==="
-echo "Web UI:  http://10.11.100.57:$WEB_PORT"
-echo "Ollama:  http://10.11.100.57:$OLLAMA_PORT"
+echo "Web UI:  http://10.11.100.56:$WEB_PORT"
+echo "Ollama:  http://10.11.100.56:$OLLAMA_PORT"
