@@ -1,4 +1,6 @@
 import cv2
+import glob
+import platform
 import threading
 import logging
 import time
@@ -71,14 +73,35 @@ class CameraManager:
         self.stop()
         return self.start(camera_id)
 
-    @staticmethod
-    def list_cameras(max_check: int = 5) -> list[dict]:
+    def list_cameras(self, max_check: int = 5) -> list[dict]:
         cameras = []
-        for i in range(max_check):
-            cap = cv2.VideoCapture(i)
-            if cap.isOpened():
-                w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-                h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-                cameras.append({"id": i, "name": f"Camera {i}", "resolution": f"{w}x{h}"})
-                cap.release()
+        if platform.system() == "Linux":
+            # On Linux, enumerate /dev/video* devices instead of opening them
+            # (opening a device already in use by the capture thread will fail)
+            devs = sorted(glob.glob("/dev/video*"))
+            seen_ids: set[int] = set()
+            for dev in devs:
+                try:
+                    idx = int(dev.replace("/dev/video", ""))
+                except ValueError:
+                    continue
+                if idx in seen_ids:
+                    continue
+                seen_ids.add(idx)
+                # For the currently active camera, read resolution from the live capture
+                if idx == self.current_camera_id and self.cap and self.cap.isOpened():
+                    w = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                    h = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                    cameras.append({"id": idx, "name": f"Camera {idx}", "resolution": f"{w}x{h}"})
+                else:
+                    cameras.append({"id": idx, "name": f"Camera {idx}", "resolution": "unknown"})
+        else:
+            # macOS / Windows: try opening each index
+            for i in range(max_check):
+                cap = cv2.VideoCapture(i)
+                if cap.isOpened():
+                    w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                    h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                    cameras.append({"id": i, "name": f"Camera {i}", "resolution": f"{w}x{h}"})
+                    cap.release()
         return cameras

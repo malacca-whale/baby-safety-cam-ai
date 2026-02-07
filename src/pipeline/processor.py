@@ -40,6 +40,9 @@ class Pipeline:
         self._audio_log_interval = 10
         self._last_audio_log_time: float = 0
         self._ai_camera_id: int = 0
+        self._vision_in_progress = False
+        self._last_vision_request_time: float = 0
+        self._vision_min_interval = 30  # minimum seconds between VLM requests
 
     def start(self, camera_id: int | None = None, mic_id: int | None = None):
         camera_ok = self.camera.start(camera_id)
@@ -118,12 +121,27 @@ class Pipeline:
         return success
 
     def _vision_loop(self):
-        interval = 1.0 / Config.VISION_FPS
         while self._running:
-            start_t = time.time()
-            frame = self.get_ai_frame()  # Use AI camera for vision analysis
+            # Throttle: skip if previous request still in progress or too recent
+            now = time.time()
+            if self._vision_in_progress:
+                time.sleep(5)
+                continue
+            since_last = now - self._last_vision_request_time
+            if since_last < self._vision_min_interval:
+                time.sleep(min(5, self._vision_min_interval - since_last))
+                continue
+
+            frame = self.get_ai_frame()
             if frame is not None and self.vision:
-                baby_status = self.vision.analyze_frame(frame)
+                self._vision_in_progress = True
+                self._last_vision_request_time = time.time()
+                logger.info("Vision analysis starting...")
+                try:
+                    baby_status = self.vision.analyze_frame(frame)
+                finally:
+                    self._vision_in_progress = False
+
                 audio_status = self.audio.get_status()
 
                 with self._lock:
@@ -136,18 +154,20 @@ class Pipeline:
                 motion_status = self._last_combined.motion
                 self.alert_manager.check_and_alert(baby_status, motion_status, frame)
 
-                now = time.time()
-                if audio_status.is_crying and (now - self._last_cry_alert_time > self._cry_cooldown):
+                elapsed = time.time() - self._last_vision_request_time
+                logger.info(f"Vision analysis completed in {elapsed:.1f}s")
+
+                t = time.time()
+                if audio_status.is_crying and (t - self._last_cry_alert_time > self._cry_cooldown):
                     self.alert_manager.discord.send_warning(
                         "Baby Crying Detected",
                         audio_status.description,
                         "warning",
                         frame,
                     )
-                    self._last_cry_alert_time = now
-
-            elapsed = time.time() - start_t
-            time.sleep(max(0, interval - elapsed))
+                    self._last_cry_alert_time = t
+            else:
+                time.sleep(5)
 
     def _motion_loop(self):
         interval = 1.0 / Config.MOTION_FPS

@@ -4,7 +4,8 @@ set -e
 # ============================================
 # Baby AI Cam - Production Deployment Script
 # Target: gq@10.11.100.56
-# Ports: 54291 (web UI), 54292 (Ollama)
+# Ports: 54291 (web UI)
+# Ollama: localhost:11434 (default, internal only)
 # ============================================
 
 REMOTE_HOST="gq@10.11.100.56"
@@ -12,12 +13,10 @@ REMOTE_DIR="~/works/baby-ai-cam/baby-ai-cam-1"
 LOCAL_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 WEB_PORT=54291
-OLLAMA_PORT=54292
 
 echo "=== Baby AI Cam Production Deploy ==="
 echo "Target: $REMOTE_HOST:$REMOTE_DIR"
 echo "Web UI Port: $WEB_PORT"
-echo "Ollama Port: $OLLAMA_PORT"
 echo ""
 
 # --- Step 1: Prepare remote directory ---
@@ -56,11 +55,11 @@ ssh "$REMOTE_HOST" 'sudo apt-get install -y -qq libportaudio2 libsndfile1 libgl1
 
 # --- Step 5: Create production .env ---
 echo "[5/8] Creating production .env..."
-cat <<ENVEOF | ssh "$REMOTE_HOST" "cat > $REMOTE_DIR/.env"
+cat <<'ENVEOF' | ssh "$REMOTE_HOST" "cat > $REMOTE_DIR/.env"
 FLASK_HOST=0.0.0.0
-FLASK_PORT=${WEB_PORT}
-OLLAMA_URL=http://localhost:${OLLAMA_PORT}
-OLLAMA_MODEL=qwen3-vl:latest
+FLASK_PORT=54291
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=qwen3-vl:2b
 
 DISCORD_WARNING_WEBHOOK=https://discord.com/api/webhooks/1469017862223036712/BcLQ9mpmV60taBuWl2o3D_8hRxWGFonx2FYyTAg8-GR7OudmioBDJCj3SkSeMcYRhqJh
 DISCORD_STATUS_WEBHOOK=https://discord.com/api/webhooks/1469018038211969065/KxE0FjQ_b1VpgMKg354YO1UMZW66CbjKTY_aTdefuf1irrnSwx2uoCDLGQY23bsBDz2d
@@ -73,46 +72,65 @@ VIDEO_STREAM_FPS=30
 STATUS_REPORT_INTERVAL=300
 ENVEOF
 
-# --- Step 6: Install Python dependencies ---
-echo "[6/8] Installing Python dependencies..."
+# --- Step 6: Install Python dependencies + configure Ollama ---
+echo "[6/8] Installing deps + configuring Ollama..."
 ssh "$REMOTE_HOST" "cd $REMOTE_DIR && ~/.local/bin/uv sync 2>&1 | tail -5"
 
-# --- Step 7: Configure Ollama on port 54292 + update + pull model ---
-echo "[7/8] Configuring Ollama on port $OLLAMA_PORT..."
+# Revert Ollama to default port (localhost:11434 only)
+ssh "$REMOTE_HOST" 'sudo rm -f /etc/systemd/system/ollama.service.d/override.conf && sudo systemctl daemon-reload && sudo systemctl restart ollama'
+sleep 2
 
-# Update Ollama
-ssh "$REMOTE_HOST" 'curl -fsSL https://ollama.com/install.sh | sh 2>&1 | tail -3'
+# Wait for Ollama
+ssh "$REMOTE_HOST" 'for i in $(seq 1 15); do curl -s http://localhost:11434/api/tags >/dev/null 2>&1 && echo "Ollama ready on 11434!" && break || (echo "waiting..." && sleep 2); done'
 
-# Create systemd override for port
-ssh "$REMOTE_HOST" "sudo mkdir -p /etc/systemd/system/ollama.service.d"
-cat <<EOF | ssh "$REMOTE_HOST" "sudo tee /etc/systemd/system/ollama.service.d/override.conf > /dev/null"
+# Pull qwen3-vl:2b model
+echo "Pulling qwen3-vl:2b model..."
+ssh "$REMOTE_HOST" "ollama pull qwen3-vl:2b"
+
+# --- Step 7: Install systemd service ---
+echo "[7/8] Installing systemd service..."
+REMOTE_DIR_EXPANDED=$(ssh "$REMOTE_HOST" "echo $REMOTE_DIR")
+UV_PATH=$(ssh "$REMOTE_HOST" 'readlink -f ~/.local/bin/uv')
+
+cat <<SVCEOF | ssh "$REMOTE_HOST" "sudo tee /etc/systemd/system/baby-ai-cam.service > /dev/null"
+[Unit]
+Description=Baby AI Cam Monitor
+After=network.target ollama.service
+Wants=ollama.service
+
 [Service]
-Environment="OLLAMA_HOST=0.0.0.0:${OLLAMA_PORT}"
-EOF
-ssh "$REMOTE_HOST" 'sudo systemctl daemon-reload && sudo systemctl restart ollama'
+Type=simple
+User=gq
+WorkingDirectory=${REMOTE_DIR_EXPANDED}
+ExecStart=${UV_PATH} run python -m src.main
+Restart=always
+RestartSec=10
+StandardOutput=append:/home/gq/baby-ai-cam.log
+StandardError=append:/home/gq/baby-ai-cam.log
+Environment=HOME=/home/gq
 
-# Wait for Ollama to be ready
-echo "Waiting for Ollama on port $OLLAMA_PORT..."
-ssh "$REMOTE_HOST" 'for i in $(seq 1 15); do curl -s http://localhost:'"$OLLAMA_PORT"'/api/tags >/dev/null 2>&1 && echo "Ollama ready!" && break || (echo "waiting..." && sleep 2); done'
+[Install]
+WantedBy=multi-user.target
+SVCEOF
 
-# Pull qwen3-vl model
-echo "Pulling qwen3-vl model..."
-ssh "$REMOTE_HOST" "OLLAMA_HOST=http://localhost:$OLLAMA_PORT ollama pull qwen3-vl:latest"
+ssh "$REMOTE_HOST" 'sudo systemctl daemon-reload && sudo systemctl enable baby-ai-cam.service'
+echo "systemd service installed and enabled"
 
 # --- Step 8: Start the application ---
 echo "[8/8] Starting Baby AI Cam..."
 
-# Kill any existing instance
-ssh "$REMOTE_HOST" 'kill $(pgrep -f "python.*src.main") 2>/dev/null; sleep 1; echo "cleaned"'
+# Stop any existing instance (nohup or systemd)
+ssh "$REMOTE_HOST" 'ps aux | grep "src.main" | grep -v grep | awk "{print \$2}" | xargs -r kill 2>/dev/null; sleep 1; echo "cleaned old processes"'
 
-# Start the app with nohup
-ssh "$REMOTE_HOST" "cd $REMOTE_DIR && nohup ~/.local/bin/uv run python -m src.main > ~/baby-ai-cam.log 2>&1 &"
-sleep 4
+# Clear log and start via systemd
+ssh "$REMOTE_HOST" '> ~/baby-ai-cam.log && sudo systemctl restart baby-ai-cam.service'
+sleep 5
 
 # Verify
-ssh "$REMOTE_HOST" 'if pgrep -f "python.*src.main" > /dev/null; then echo "=== Baby AI Cam is running! ==="; else echo "ERROR: Check ~/baby-ai-cam.log"; tail -20 ~/baby-ai-cam.log; exit 1; fi'
+ssh "$REMOTE_HOST" 'if systemctl is-active --quiet baby-ai-cam.service; then echo "=== Baby AI Cam is running (systemd) ==="; else echo "ERROR: Service failed"; sudo systemctl status baby-ai-cam.service --no-pager; journalctl -u baby-ai-cam.service --no-pager -n 20; exit 1; fi'
 
 echo ""
 echo "=== Deployment Complete ==="
-echo "Web UI:  http://10.11.100.56:$WEB_PORT"
-echo "Ollama:  http://10.11.100.56:$OLLAMA_PORT"
+echo "Web UI: http://10.11.100.56:$WEB_PORT"
+echo "Service: sudo systemctl {start|stop|restart|status} baby-ai-cam.service"
+echo "Logs: tail -f ~/baby-ai-cam.log"

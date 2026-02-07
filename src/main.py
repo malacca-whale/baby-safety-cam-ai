@@ -34,7 +34,7 @@ db = Database()
 
 @app.route("/")
 def index():
-    cameras = CameraManager.list_cameras()
+    cameras = pipeline.camera.list_cameras()
     microphones = AudioAnalyzer.list_devices()
     return render_template("index.html", cameras=cameras, microphones=microphones)
 
@@ -70,7 +70,7 @@ def get_status():
 
 @app.route("/api/cameras")
 def get_cameras():
-    return jsonify(CameraManager.list_cameras())
+    return jsonify(pipeline.camera.list_cameras())
 
 
 @app.route("/api/microphones")

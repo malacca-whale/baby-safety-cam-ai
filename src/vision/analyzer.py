@@ -32,12 +32,12 @@ DEFAULT_ANALYSIS_PROMPT = """당신은 SIDS 예방 가이드라인(AAP 안전 �
 관찰한 내용을 자연스러운 한국어로 2-3문장으로 설명하세요. 아기의 상태와 안전성에 대해 명확하게 서술하세요."""
 
 
-VQA_MAX_SIZE = 512  # max width for Ollama VQA requests
+VQA_MAX_SIZE = 256  # max width for Ollama VQA requests
 
 
 class VisionAnalyzer:
     def __init__(self):
-        self.client = httpx.Client(timeout=300.0)
+        self.client = httpx.Client(timeout=600.0)
         self.last_status = BabyStatus()
         self._warmed_up = False
         self.db = Database()
