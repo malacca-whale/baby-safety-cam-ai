@@ -59,7 +59,7 @@ cat <<'ENVEOF' | ssh "$REMOTE_HOST" "cat > $REMOTE_DIR/.env"
 FLASK_HOST=0.0.0.0
 FLASK_PORT=54291
 OLLAMA_URL=http://localhost:11434
-OLLAMA_MODEL=qwen3-vl:2b
+OLLAMA_MODEL=moondream
 
 DISCORD_WARNING_WEBHOOK=https://discord.com/api/webhooks/1469017862223036712/BcLQ9mpmV60taBuWl2o3D_8hRxWGFonx2FYyTAg8-GR7OudmioBDJCj3SkSeMcYRhqJh
 DISCORD_STATUS_WEBHOOK=https://discord.com/api/webhooks/1469018038211969065/KxE0FjQ_b1VpgMKg354YO1UMZW66CbjKTY_aTdefuf1irrnSwx2uoCDLGQY23bsBDz2d
@@ -83,9 +83,9 @@ sleep 2
 # Wait for Ollama
 ssh "$REMOTE_HOST" 'for i in $(seq 1 15); do curl -s http://localhost:11434/api/tags >/dev/null 2>&1 && echo "Ollama ready on 11434!" && break || (echo "waiting..." && sleep 2); done'
 
-# Pull qwen3-vl:2b model
-echo "Pulling qwen3-vl:2b model..."
-ssh "$REMOTE_HOST" "ollama pull qwen3-vl:2b"
+# Pull moondream model
+echo "Pulling moondream model..."
+ssh "$REMOTE_HOST" "ollama pull moondream"
 
 # --- Step 7: Install systemd service ---
 echo "[7/8] Installing systemd service..."

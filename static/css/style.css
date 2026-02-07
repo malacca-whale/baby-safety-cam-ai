@@ -614,6 +614,26 @@ textarea:focus {
     border-color: var(--danger);
 }
 
+.stat-item.stat-error {
+    border-color: var(--danger);
+    background: rgba(231,76,60,0.08);
+}
+
+.stat-item.stat-error .stat-value {
+    color: var(--danger);
+}
+
+.error-banner {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: rgba(231,76,60,0.1);
+    border: 1px solid var(--danger);
+    border-radius: 8px;
+    color: var(--danger);
+    font-size: 0.82rem;
+    word-break: break-all;
+}
+
 .stat-icon {
     font-size: 1.4rem;
 }

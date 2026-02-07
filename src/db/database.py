@@ -252,4 +252,17 @@ class Database:
         ).fetchone()
         stats["cry_count"] = row["cnt"]
 
+        # Vision error stats
+        row = conn.execute(
+            "SELECT COUNT(*) as cnt FROM events WHERE event_type = 'vision_error'"
+        ).fetchone()
+        stats["vision_errors"] = row["cnt"]
+
+        row = conn.execute(
+            "SELECT data, created_at FROM events WHERE event_type = 'vision_error' ORDER BY created_at DESC LIMIT 1"
+        ).fetchone()
+        if row:
+            stats["last_vision_error"] = row["data"]
+            stats["last_vision_error_at"] = row["created_at"]
+
         return stats

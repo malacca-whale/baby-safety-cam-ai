@@ -411,6 +411,28 @@ async function updateStats() {
         setVal('statDiscord', s.discord_messages);
         setVal('statAlerts', s.alerts_count);
         setVal('statCries', s.cry_count);
+
+        // Vision errors
+        const errCount = s.vision_errors || 0;
+        const errItem = document.getElementById('statErrorItem');
+        const errBanner = document.getElementById('visionErrorBanner');
+        if (errCount > 0) {
+            setVal('statVisionErrors', errCount);
+            if (errItem) errItem.style.display = '';
+            if (errBanner && s.last_vision_error) {
+                let errData;
+                try { errData = JSON.parse(s.last_vision_error); } catch { errData = {}; }
+                const errMsg = errData.error || s.last_vision_error || '';
+                const errAt = s.last_vision_error_at;
+                const ago = errAt ? Math.floor((Date.now()/1000 - errAt) / 60) : null;
+                const agoText = ago !== null ? `${ago}분 전` : '';
+                errBanner.textContent = `최근 추론 실패: ${errMsg} ${agoText}`;
+                errBanner.style.display = '';
+            }
+        } else {
+            if (errItem) errItem.style.display = 'none';
+            if (errBanner) errBanner.style.display = 'none';
+        }
     } catch (e) {}
 }
 
