@@ -1,5 +1,4 @@
 import base64
-import json
 import logging
 import os
 import httpx
@@ -33,7 +32,7 @@ DEFAULT_ANALYSIS_PROMPT = """당신은 SIDS 예방 가이드라인(AAP 안전 �
 관찰한 내용을 자연스러운 한국어로 2-3문장으로 설명하세요. 아기의 상태와 안전성에 대해 명확하게 서술하세요."""
 
 
-VQA_MAX_SIZE = 240  # max width for Ollama VQA requests
+VQA_MAX_SIZE = 320  # max width for Ollama VQA requests
 
 
 class VisionAnalyzer:
@@ -85,54 +84,45 @@ class VisionAnalyzer:
 
     def _judge_severity(self, vlm_text: str) -> tuple[str, str, bool]:
         """
-        LLM reads VLM output and decides:
-        - risk_level: safe/warning/danger
-        - channel: alert or status
-        - should_alert: whether to send Discord alert
-
+        Rule-based severity judgment from VLM text output.
         Returns: (risk_level, channel, should_alert)
         """
-        try:
-            judge_prompt = f"""아래는 아기 모니터링 AI가 카메라 이미지를 분석한 결과입니다:
+        text = vlm_text.lower()
 
-"{vlm_text}"
+        # Danger keywords (face covered, prone sleeping, suffocation)
+        danger_keywords = [
+            "face covered", "face is covered", "covered face",
+            "face down", "on stomach", "on its stomach", "on their stomach",
+            "on his stomach", "on her stomach", "prone", "facedown",
+            "suffocati", "can't breathe", "cannot breathe",
+            "blanket over face", "blanket covering face",
+            "nose covered", "mouth covered",
+        ]
 
-이 분석 결과를 읽고 다음을 판단하세요:
-1. 위험 수준: "safe", "warning", "danger" 중 하나
-2. 이것이 즉각적인 알림이 필요한 심각한 상황입니까?
+        # Warning keywords
+        warning_keywords = [
+            "on side", "on its side", "on their side", "on his side", "on her side",
+            "side sleeping",
+            "loose blanket", "loose object", "pillow near",
+            "not in crib", "outside crib", "out of crib",
+            "stuffed animal", "toy near",
+        ]
 
-다음 기준을 따르세요:
-- "danger": 얼굴 가려짐, 엎드려 자는 중, 질식 위험 등 → 즉시 알림 필요
-- "warning": 침대 밖, 느슨한 물건, 경미한 위험 → 알림 필요할 수 있음
-- "safe": 정상 수면, 안전한 환경 → 알림 불필요
+        # Check danger first
+        for kw in danger_keywords:
+            if kw in text:
+                logger.info(f"Rule judgment: danger (matched '{kw}')")
+                return "danger", "alert", True
 
-JSON 형식으로만 답변하세요:
-{{"risk_level": "safe/warning/danger", "should_alert": true/false, "reason": "판단 이유 한문장"}}"""
+        # Check warning
+        for kw in warning_keywords:
+            if kw in text:
+                logger.info(f"Rule judgment: warning (matched '{kw}')")
+                return "warning", "alert", True
 
-            response = self.client.post(
-                f"{Config.OLLAMA_URL}/api/chat",
-                json={
-                    "model": Config.OLLAMA_MODEL,
-                    "messages": [{"role": "user", "content": judge_prompt}],
-                    "stream": False,
-                    "format": "json",
-                },
-            )
-            response.raise_for_status()
-            data = response.json()
-            judgment = json.loads(data["message"]["content"])
-
-            risk_level = judgment.get("risk_level", "warning")
-            should_alert = judgment.get("should_alert", False)
-            channel = "alert" if should_alert else "status"
-
-            logger.info(f"LLM judgment: {risk_level}, alert={should_alert}, reason={judgment.get('reason')}")
-            return risk_level, channel, should_alert
-
-        except Exception as e:
-            logger.error(f"LLM judgment failed: {e}")
-            # Fallback to safe defaults
-            return "warning", "status", False
+        # Default: safe
+        logger.info("Rule judgment: safe (no risk keywords found)")
+        return "safe", "status", False
 
     def _save_resized(self, small: np.ndarray):
         out_dir = os.path.join(os.path.dirname(__file__), "..", "..", "output", "resized")
